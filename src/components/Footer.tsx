@@ -6,15 +6,17 @@ export const Footer = async () => {
   
   return (
     <footer className="bg-gray-800 text-white py-8">
-      <div className="container mx-auto text-center">
-        <SnsIcons 
-          xUrl={profile.x_url} 
-          youtubeUrl={profile.youtube_url}
-          className="mb-6" 
-        />
-        <p className="text-sm">
-          &copy; {new Date().getFullYear()} DXの羅針盤. All rights reserved.
-        </p>
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col items-center">
+          <SnsIcons 
+            xUrl={profile.x_url} 
+            youtubeUrl={profile.youtube_url}
+            className="mb-6" 
+          />
+          <p className="text-sm">
+            &copy; {new Date().getFullYear()} DXの羅針盤. All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );
