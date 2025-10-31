@@ -51,12 +51,12 @@ export const getArticles = async (queries?: MicroCMSQueries) => {
 };
 
 // 記事詳細の取得
-export const getArticleDetail = async (
+export const getArticleDetail = async <T = Article>( 
   contentId: string,
   queries?: MicroCMSQueries
 ) => {
-  const detailData = await client.get<Article>({
-    endpoint: "posts", // articles → posts に変更
+  const detailData = await client.get<T>({ 
+    endpoint: "posts",
     contentId,
     queries,
   });
@@ -71,8 +71,6 @@ export const getProfile = async (queries?: MicroCMSQueries) => {
   });
   return profileData;
 };
-
-// ...（既存の型定義や関数の下に追記）...
 
 // カテゴリの型定義を追加
 export type Category = {
