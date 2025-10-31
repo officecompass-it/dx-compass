@@ -5,10 +5,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
   // 投稿記事
+  // ★ 修正: limitの上限値を1000から100に変更
   const posts = await getArticles({ limit: 100 });
   const postRoutes = posts.contents.map((post) => ({
     url: `${BASE_URL}/posts/${post.id}`,
-    // ★ 修正: revisedAtが存在しない場合はupdatedAtを使用する
     lastModified: new Date(post.revisedAt || post.updatedAt),
   }));
 
