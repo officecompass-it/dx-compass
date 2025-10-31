@@ -8,14 +8,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await getArticles({ limit: 1000 });
   const postRoutes = posts.contents.map((post) => ({
     url: `${BASE_URL}/posts/${post.id}`,
-    lastModified: new Date(post.revisedAt),
+    // ★ 修正: revisedAtが存在しない場合はupdatedAtを使用する
+    lastModified: new Date(post.revisedAt || post.updatedAt),
   }));
 
   // カテゴリー
   const categories = await getCategories({ limit: 100 });
   const categoryRoutes = categories.contents.map((category) => ({
     url: `${BASE_URL}/category/${category.id}`,
-    lastModified: new Date(), // カテゴリ自体の更新日がないため現在日時
+    lastModified: new Date(),
   }));
 
   // 固定ページ
