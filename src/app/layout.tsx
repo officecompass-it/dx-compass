@@ -2,11 +2,8 @@ import type { Metadata } from 'next';
 import { Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header';
-import { Footer } from '@/components/Footer'; // ★ 修正: 通常のインポートに戻す
+import { Footer } from '@/components/Footer';
 import { getCategories } from '@/lib/microcms';
-// import dynamic from 'next/dynamic'; // ← dynamicのインポートを削除
-
-// ★ 修正: dynamic importの記述をすべて削除
 
 const notoSansJp = Noto_Sans_JP({ subsets: ['latin'], weight: ['400', '700'] });
 const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
