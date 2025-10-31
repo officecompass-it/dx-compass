@@ -50,7 +50,7 @@ export default async function ProfilePage() {
     image: profile.avatar.url,
     url: (process.env.NEXT_PUBLIC_SITE_URL || "") + "/profile",
     description: profile.bio,
-    sameAs: [profile.x_url, profile.github_url].filter(Boolean),
+    sameAs: [profile.x_url, profile.youtube_url].filter(Boolean),
   };
 
   return (
@@ -71,24 +71,11 @@ export default async function ProfilePage() {
           />
           <div className="mt-6 sm:mt-0 sm:ml-8 text-center sm:text-left">
             <h1 className="text-3xl font-bold text-gray-900">{profile.name}</h1>
-
-
+            
             <div className="mt-4">
-              <SnsIcons xUrl={profile.x_url} githubUrl={profile.github_url} />
+              <SnsIcons xUrl={profile.x_url} youtubeUrl={profile.youtube_url} />
             </div>
 
-            <div className="flex justify-center sm:justify-start space-x-4 mt-3">
-              {profile.x_url && (
-                <a href={profile.x_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                  X (Twitter)
-                </a>
-              )}
-              {profile.github_url && (
-                <a href={profile.github_url} target="_blank" rel="noopener noreferrer" className="text-gray-700 hover:underline">
-                  GitHub
-                </a>
-              )}
-            </div>
           </div>
         </div>
         <div className="mt-8 border-t pt-6">
