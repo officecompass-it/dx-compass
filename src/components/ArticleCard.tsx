@@ -9,7 +9,7 @@ type Props = {
   priority?: boolean;
 };
 
-export const ArticleCard = ({ article, variant = 'grid' }: Props) => {
+export const ArticleCard = ({ article, variant = 'grid', priority = false }: Props) => {
   const hasPublishedDate = article.publishedAt;
   const cardClasses = "bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 flex flex-col relative hover:z-10 h-full";
 
@@ -23,6 +23,7 @@ export const ArticleCard = ({ article, variant = 'grid' }: Props) => {
             className="absolute top-0 left-0 w-full h-full object-cover"
             width={article.eyecatch?.width || 1200}
             height={article.eyecatch?.height || 630}
+            priority={priority}
           />
         </div>
         <div className="p-4 md:p-5 flex flex-col flex-grow">
@@ -31,7 +32,6 @@ export const ArticleCard = ({ article, variant = 'grid' }: Props) => {
               {article.category.name}
             </span>
           )}
-          {/* ★ 修正: whitespace-pre-line を削除 */}
           <h3 className="text-base font-bold text-gray-900 mb-2 leading-relaxed line-clamp-2 h-12">
             {article.title}
           </h3>
@@ -42,7 +42,8 @@ export const ArticleCard = ({ article, variant = 'grid' }: Props) => {
           )}
           {hasPublishedDate && (
              <time dateTime={article.publishedAt} className="text-xs text-gray-500 mt-auto pt-3">
-                {formatDate(article.publishedAt)}
+                {/* ★ 修正: non-null assertion (!) を追加 */}
+                {formatDate(article.publishedAt!)}
             </time>
           )}
         </div>
