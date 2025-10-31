@@ -27,6 +27,7 @@ export type Profile = {
   avatar: MicroCMSImage;
   x_url?: string;
   github_url?: string;
+  youtube_url?: string; 
 } & MicroCMSDate;
 
 if (!process.env.MICROCMS_SERVICE_DOMAIN) {
@@ -44,7 +45,7 @@ export const client = createClient({
 // 記事一覧の取得
 export const getArticles = async (queries?: MicroCMSQueries) => {
   const listData = await client.getList<Article>({
-    endpoint: "posts", // articles → posts に変更
+    endpoint: "posts",
     queries,
   });
   return listData;
@@ -82,7 +83,7 @@ export type Category = {
   name: string;
 };
 
-// カテゴリ一覧を取得する関数を追加 (ビルド時の静的生成に利用)
+// カテゴリ一覧を取得する関数を追加
 export const getCategories = async (queries?: MicroCMSQueries) => {
   const listData = await client.getList<Category>({
     endpoint: 'categories',
@@ -113,7 +114,7 @@ export const getPostsByCategory = async (
     endpoint: 'posts',
     queries: {
       ...queries,
-      filters: `category[equals]${categoryId}`, // categoryフィールドが指定のIDと一致するものをフィルタ
+      filters: `category[equals]${categoryId}`,
     },
   });
 
