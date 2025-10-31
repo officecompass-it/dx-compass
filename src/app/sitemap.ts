@@ -4,7 +4,6 @@ import { MetadataRoute } from 'next';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
 
-  // 投稿記事
   // ★ 修正: limitの上限値を1000から100に変更
   const posts = await getArticles({ limit: 100 });
   const postRoutes = posts.contents.map((post) => ({
