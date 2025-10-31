@@ -4,19 +4,18 @@ type Props = {
   xUrl?: string;
   youtubeUrl?: string;
   className?: string;
+  useDefaults?: boolean;
 };
 
-// ★ デフォルトのURLをコンポーネントの外で定義
 const DEFAULT_X_URL = "https://twitter.com/YOUR_ACCOUNT";
 const DEFAULT_YOUTUBE_URL = "https://youtube.com/YOUR_CHANNEL";
 
-export const SnsIcons = ({ xUrl, youtubeUrl, className = '' }: Props) => {
-  // ★ 修正: Propsで渡されたURLがあればそれを使う。なければデフォルト値を使う。
-  const finalXUrl = xUrl || DEFAULT_X_URL;
-  const finalYoutubeUrl = youtubeUrl || DEFAULT_YOUTUBE_URL;
+export const SnsIcons = ({ xUrl, youtubeUrl, className = '', useDefaults = false }: Props) => {
+  const finalXUrl = xUrl || (useDefaults ? DEFAULT_X_URL : undefined);
+  const finalYoutubeUrl = youtubeUrl || (useDefaults ? DEFAULT_YOUTUBE_URL : undefined);
 
   return (
-    <div className={`flex justify-center space-x-6 ${className}`}>
+    <div className={`flex justify-center sm:justify-start space-x-6 ${className}`}>
       {/* X (Twitter) Icon */}
       {finalXUrl && (
         <Link href={finalXUrl} target="_blank" rel="noopener noreferrer" aria-label="Xのプロフィール">
