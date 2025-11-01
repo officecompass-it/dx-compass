@@ -6,11 +6,15 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { formatDate } from '@/utils/formatDate';
 import type { Article } from '@/lib/microcms';
 
+// サイトURLを安全に構築するヘルパー関数
+const getSiteUrl = () => {
+  return process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000');
+};
+
 type Props = {
   params: { id: string };
 };
 
-// Articleの型定義にnoindexを追加
 type ArticleWithNoIndex = Article & {
   noindex?: boolean;
 };
@@ -27,23 +31,23 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = `${article.title} | DXの羅針盤`;
   const description = article.description || article.title;
   const ogImageUrl = article.eyecatch?.url || '/default-og-image.png';
+  const siteUrl = getSiteUrl();
 
   const metadata: Metadata = {
     title: title,
     description: description,
     alternates: {
-      canonical: `/posts/${article.id}`,
+      canonical: new URL(`/posts/${article.id}`, siteUrl).toString(),
     },
     openGraph: {
       title: title,
       description: description,
-      url: `/posts/${article.id}`,
+      url: new URL(`/posts/${article.id}`, siteUrl).toString(),
       type: 'article',
       images: [{ url: ogImageUrl, width: 1200, height: 630, alt: article.title }],
     },
   };
 
-  // noindexがtrueの場合、robotsメタタグを追加
   if (article.noindex === true) {
     metadata.robots = {
       index: false,
@@ -78,11 +82,13 @@ export default async function ArticleDetail({ params }: Props) {
     { name: 'ホーム', href: '/' },
   ];
   if (article.category) {
-    breadcrumbItems.push({ name: article.category.name, href: `/category/${article.category.id}` });
+    // カテゴリのリンク先を slug に修正
+    breadcrumbItems.push({ name: article.category.name, href: `/category/${article.category.slug}` });
   }
   breadcrumbItems.push({ name: article.title, href: `/posts/${article.id}` });
 
   // JSON-LD (構造化データ) の拡充
+  const siteUrl = getSiteUrl();
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -93,20 +99,20 @@ export default async function ArticleDetail({ params }: Props) {
     'author': profile ? [{
       '@type': 'Person',
       'name': profile.name,
-      'url': new URL('/profile', process.env.NEXT_PUBLIC_SITE_URL).toString(),
+      'url': new URL('/profile', siteUrl).toString(),
     }] : [],
     'publisher': {
       '@type': 'Organization',
       'name': 'DXの羅針盤',
       'logo': {
         '@type': 'ImageObject',
-        'url': new URL('/logo.png', process.env.NEXT_PUBLIC_SITE_URL).toString(),
+        'url': new URL('/logo.png', siteUrl).toString(),
       },
     },
     'description': article.description || article.title,
     'mainEntityOfPage': {
       '@type': 'WebPage',
-      '@id': new URL(`/posts/${article.id}`, process.env.NEXT_PUBLIC_SITE_URL).toString(),
+      '@id': new URL(`/posts/${article.id}`, siteUrl).toString(),
     },
   };
 

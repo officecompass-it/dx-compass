@@ -2,24 +2,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation'; // ★ Hookをインポート
+import { usePathname } from 'next/navigation';
 import { Search } from './Search';
 import { CategoryPills } from './CategoryPills';
-import type { Category } from '@/lib/microcms';
+import type { HierarchicalCategory } from '@/lib/microcms';
 
 type Props = {
-  categories: Category[];
+  categories: HierarchicalCategory[];
 }
 
 export const Header = ({ categories }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname(); // ★ 現在のパスを取得
+  const pathname = usePathname();
 
   const handleLinkClick = () => {
     setIsOpen(false);
   };
 
-  // ★ 修正: 現在のパスが記事ページかどうかを判定
   const isPostPage = pathname.startsWith('/posts/');
 
   return (
@@ -49,9 +48,9 @@ export const Header = ({ categories }: Props) => {
           <div className="md:hidden">
             <button onClick={() => setIsOpen(!isOpen)} aria-label="メニューを開閉する">
               {isOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3-org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3-org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
               )}
             </button>
           </div>
@@ -70,13 +69,22 @@ export const Header = ({ categories }: Props) => {
         )}
       </header>
       
-      {/* ★ 修正: 記事ページでは表示しないように条件分岐を追加 */}
       {!isPostPage && (
-        <div className="bg-white">
+        <div className="bg-white border-b">
           <div className="md:hidden container mx-auto p-4">
             <Search />
           </div>
-          <CategoryPills categories={categories} />
+          {/* ▼▼▼ ここから修正 ▼▼▼ */}
+          {/* CategoryPillsをoverflowコンテナでラップする */}
+          <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <CategoryPills categories={categories} />
+            <style jsx>{`
+              div::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+          </div>
+          {/* ▲▲▲ ここまで修正 ▲▲▲ */}
         </div>
       )}
     </div>

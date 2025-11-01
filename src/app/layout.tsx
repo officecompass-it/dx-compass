@@ -3,7 +3,7 @@ import { Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { getCategories } from '@/lib/microcms';
+import { getHierarchicalCategories } from '@/lib/microcms';
 
 const notoSansJp = Noto_Sans_JP({ subsets: ['latin'], weight: ['400', '700'] });
 const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
@@ -30,8 +30,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const categories = await getCategories();
-  const filteredCategories = categories.contents.filter(
+   const hierarchicalCategories = await getHierarchicalCategories();
+  const filteredHierarchicalCategories = hierarchicalCategories.filter(
     (category) => category.name !== '最新情報'
   );
 
@@ -54,7 +54,7 @@ export default async function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <Header categories={filteredCategories} />
+        <Header categories={filteredHierarchicalCategories} />
         <main className="flex-grow">{children}</main>
         <Footer />
       </body>
