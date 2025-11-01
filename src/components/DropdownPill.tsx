@@ -25,7 +25,6 @@ export const DropdownPill = ({ category, isOpen, onToggle, pathname }: Props) =>
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      // スクロール量を加算しないように修正
       setMenuPosition({
         top: rect.bottom + 8,
         left: rect.left,
@@ -75,18 +74,18 @@ export const DropdownPill = ({ category, isOpen, onToggle, pathname }: Props) =>
 
   return (
     <>
-      <div className="relative">
+      <div className="relative flex-shrink-0">
         {hasChildren ? (
           <button
             ref={buttonRef}
             onClick={() => onToggle(category.id)}
-            className={`flex items-center space-x-1 flex-shrink-0 px-4 py-1.5 text-sm font-semibold rounded-full ${
+            className={`inline-flex items-center gap-1 whitespace-nowrap px-4 py-2 text-sm font-medium rounded-full transition-colors ${
               isActive ? 'text-white bg-gray-700' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
             }`}
           >
             <span>{category.name}</span>
             <svg
-              className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+              className={`w-4 h-4 flex-shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -97,7 +96,7 @@ export const DropdownPill = ({ category, isOpen, onToggle, pathname }: Props) =>
         ) : (
           <Link
             href={`/category/${category.slug}`}
-            className={`flex-shrink-0 px-4 py-1.5 text-sm font-semibold rounded-full ${
+            className={`inline-flex items-center whitespace-nowrap px-4 py-2 text-sm font-medium rounded-full transition-colors ${
               isActive ? 'text-white bg-gray-700' : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
             }`}
           >

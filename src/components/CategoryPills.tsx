@@ -25,11 +25,10 @@ export const CategoryPills = ({ categories }: Props) => {
 
   return (
     <div className="py-2" ref={menuRef}>
-      {/* ▼▼▼ 修正箇所: このdivに "flex-nowrap" を追加 ▼▼▼ */}
-      <div className="flex flex-nowrap space-x-3 px-4">
+      <div className="flex items-center gap-3 overflow-x-auto px-4 scrollbar-hide">
         <Link
           href="/"
-          className={`flex-shrink-0 px-4 py-1.5 text-sm font-semibold rounded-full ${
+          className={`inline-flex items-center flex-shrink-0 px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap transition-colors ${
             pathname === '/'
               ? 'text-white bg-gray-700'
               : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
@@ -39,13 +38,14 @@ export const CategoryPills = ({ categories }: Props) => {
         </Link>
 
         {categories.map(category => (
-          <DropdownPill
-            key={category.id}
-            category={category}
-            isOpen={openMenuId === category.id}
-            onToggle={handleTogglePill}
-            pathname={pathname}
-          />
+          <div key={category.id} className="flex-shrink-0">
+            <DropdownPill
+              category={category}
+              isOpen={openMenuId === category.id}
+              onToggle={handleTogglePill}
+              pathname={pathname}
+            />
+          </div>
         ))}
       </div>
     </div>
