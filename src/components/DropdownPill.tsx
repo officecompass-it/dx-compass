@@ -25,9 +25,10 @@ export const DropdownPill = ({ category, isOpen, onToggle, pathname }: Props) =>
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
+      // スクロール量を加算しないように修正
       setMenuPosition({
-        top: rect.bottom + window.scrollY + 8,
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 8,
+        left: rect.left,
       });
     }
   }, [isOpen]);

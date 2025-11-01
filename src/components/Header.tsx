@@ -70,12 +70,10 @@ export const Header = ({ categories }: Props) => {
       </header>
       
       {!isPostPage && (
-        <div className="bg-white border-b">
+        <div className="bg-white">
           <div className="md:hidden container mx-auto p-4">
             <Search />
           </div>
-          {/* ▼▼▼ ここから修正 ▼▼▼ */}
-          {/* CategoryPillsをoverflowコンテナでラップする */}
           <div className="overflow-x-auto" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
             <CategoryPills categories={categories} />
             <style jsx>{`
@@ -84,7 +82,6 @@ export const Header = ({ categories }: Props) => {
               }
             `}</style>
           </div>
-          {/* ▲▲▲ ここまで修正 ▲▲▲ */}
         </div>
       )}
     </div>
