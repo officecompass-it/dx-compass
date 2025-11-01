@@ -1,49 +1,65 @@
-import { getArticles, getCategories } from '@/lib/microcms';
-import { ArticleCarousel } from '@/components/ArticleCarousel';
 import { Metadata } from 'next';
+import { getPostsByCategory, getCategoryDetail } from '@/lib/microcms';
+import { ArticleCard } from '@/components/ArticleCard';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { notFound } from 'next/navigation';
 
-export const metadata: Metadata = {
-  title: 'DXの羅針盤 | AppSheetとWorkspace専門ブログ',
-  description: 'AppSheetやGoogle Workspaceの最新技術情報、実践的な活用ノウハウを発信する専門技術ブログサイト「DXの羅針盤」。',
+type Props = {
+  params: {
+    categoryId: string;
+  };
 };
 
-export default async function HomePage() {
-  const [posts, categories] = await Promise.all([
-    getArticles({ orders: '-publishedAt' }),
-    getCategories(),
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params;
+  const category = await getCategoryDetail(resolvedParams.categoryId).catch(() => null);
+
+  if (!category) {
+    return {
+      title: 'カテゴリが見つかりません',
+    };
+  }
+
+  return {
+    title: `${category.name} の記事一覧 - DXの羅針盤`,
+    description: `${category.name} に関する記事の一覧です。`,
+  };
+}
+
+export default async function CategoryPage({ params }: Props) {
+  const resolvedParams = await params;
+  
+  // ★ 修正: サイドバーが不要になったため、getCategoriesは削除
+  const [category, posts] = await Promise.all([
+    getCategoryDetail(resolvedParams.categoryId).catch(() => null),
+    getPostsByCategory(resolvedParams.categoryId).catch(() => null),
   ]);
 
-  const categoryOrder = ['AI', 'AppSheet', 'Looker Studio'];
-  
-  // ★ 修正: 最新記事の取得件数を5件に変更
-  const latestPosts = posts.contents.slice(0, 5);
+  if (!category || !posts) {
+    notFound();
+  }
+
+  const breadcrumbItems = [
+    { name: 'ホーム', href: '/' },
+    { name: category.name, href: `/category/${category.id}` },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="space-y-12">
-        {/* ★ LCP最適化: 最初の2枚の画像を優先読み込み */}
-        <ArticleCarousel 
-          title="最新記事" 
-          articles={latestPosts}
-          priorityIndices={[0, 1]}
-        />
+      {/* ★ 修正: サイドバー用のグリッドレイアウトを削除し、シンプルな構成に */}
+      <div>
+        <Breadcrumbs items={breadcrumbItems} />
+        {/* ★ 修正: 「カテゴリー:」のテキストを削除 */}
+        <h1 className="text-3xl font-bold mb-8 border-b-2 pb-2">{category.name}</h1>
         
-        {categoryOrder.map((categoryName) => {
-          const category = categories.contents.find(c => c.name === categoryName);
-          if (!category) return null;
-          
-          const postsInCategory = posts.contents.filter(post => post.category?.id === category.id);
-          if (postsInCategory.length === 0) return null;
-          
-          return (
-            <ArticleCarousel
-              key={category.id}
-              title={category.name}
-              articles={postsInCategory.slice(0, 10)}
-              viewMoreLink={`/category/${category.id}`}
-            />
-          );
-        })}
+        {/* ★ 修正: モバイルサイドバーの呼び出しを削除 */}
+
+        {/* ★ 修正: あなたが最適化したグリッドレイアウトを適用 */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+          {posts.contents.map((post) => (
+            <ArticleCard key={post.id} article={post} />
+          ))}
+        </div>
       </div>
     </div>
   );
