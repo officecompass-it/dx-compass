@@ -67,11 +67,14 @@ export const getArticles = async (queries?: MicroCMSQueries) => {
   return listData;
 };
 
-export const getArticleDetail = async (
+// ▼▼▼ ここから修正 ▼▼▼
+// <T = Article> を追加して、ジェネリック型を受け取れるようにする
+export const getArticleDetail = async <T = Article>(
   slug: string,
   queries?: MicroCMSQueries
 ) => {
-  const detailData = await client.getListDetail<Article>({
+  // client.getListDetail<Article> を client.getListDetail<T> に変更
+  const detailData = await client.getListDetail<T>({
     endpoint: "posts",
     contentId: slug,
     queries,
@@ -84,6 +87,7 @@ export const getArticleDetail = async (
   });
   return detailData;
 };
+// ▲▲▲ ここまで修正 ▲▲▲
 
 export const getProfile = async (queries?: MicroCMSQueries) => {
   const profileData = await client.getObject<Profile>({
