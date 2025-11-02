@@ -10,7 +10,7 @@ type Props = {
   isOpen: boolean;
   onToggle: (id: string) => void;
   pathname: string;
-  scrollContainerRef: RefObject<HTMLDivElement>;
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
   isLastItem: boolean;
 };
 

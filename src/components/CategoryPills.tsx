@@ -8,7 +8,7 @@ import { DropdownPill } from './DropdownPill';
 
 type Props = {
   categories: HierarchicalCategory[];
-  scrollContainerRef: RefObject<HTMLDivElement>;
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
 };
 
 export const CategoryPills = ({ categories, scrollContainerRef }: Props) => {
