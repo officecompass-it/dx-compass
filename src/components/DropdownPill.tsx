@@ -28,6 +28,7 @@ export const DropdownPill = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
+  const [isPositionCalculated, setIsPositionCalculated] = useState(false);
   const animationFrameRef = useRef<number | null>(null);
   const alignmentModeRef = useRef<AlignmentMode>('left');
 
@@ -64,12 +65,16 @@ export const DropdownPill = ({
 
   // 初期位置設定とスクロール監視
   useEffect(() => {
-    if (!isOpen || !hasChildren) return;
+    if (!isOpen || !hasChildren) {
+      setIsPositionCalculated(false);
+      return;
+    }
 
     // 初期位置を設定(配置方向も決定)
     const initialPosition = calculateMenuPosition(true);
     if (initialPosition) {
       setMenuPosition(initialPosition);
+      setIsPositionCalculated(true);
     }
 
     // スクロールコンテナが存在しない場合は早期リターン
@@ -119,7 +124,7 @@ export const DropdownPill = ({
 
   const isActive = getActiveState(category);
 
-  const dropdownMenu = isOpen && hasChildren && mounted && (
+  const dropdownMenu = isOpen && hasChildren && mounted && isPositionCalculated && (
     <div
       className="fixed w-48 bg-white rounded-md shadow-lg z-[9999] border border-gray-200"
       style={{ 
