@@ -80,7 +80,9 @@ export default async function ProfilePage() {
         </div>
         <div className="mt-8 border-t pt-6">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">自己紹介</h2>
-          <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: profile.bio }} />
+          <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+            {profile.bio}
+          </p>
         </div>
       </main>
     </>
