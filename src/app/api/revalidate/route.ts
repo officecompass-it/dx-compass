@@ -1,15 +1,36 @@
 import { revalidateTag, revalidatePath } from 'next/cache';
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function POST(request: NextRequest) {
-  // セキュリティ: シークレットトークンで認証
-// 認証チェック(大文字小文字両方に対応)
-const authHeader = request.headers.get('x-microcms-signature') || 
-                   request.headers.get('x-authorization') ||
-                   request.headers.get('X-Authorization');  
-  const secret = process.env.REVALIDATE_SECRET_TOKEN;
+// Vercel環境変数の型定義
+const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET_TOKEN;
 
-  if (!secret) {
+// microCMS Webhookペイロードの型定義
+type MicroCMSWebhookPayload = {
+  service: string;
+  api: string;
+  id: string;
+  type: 'new' | 'edit' | 'delete';
+  contents?: {
+    old?: {
+      id: string;
+      slug?: string;
+      [key: string]: any;
+    };
+    new?: {
+      id: string;
+      slug?: string;
+      [key: string]: any;
+    };
+  };
+};
+
+export async function POST(request: NextRequest) {
+  // 認証チェック(大文字小文字両方に対応)
+  const authHeader = request.headers.get('x-microcms-signature') || 
+                     request.headers.get('x-authorization') ||
+                     request.headers.get('X-Authorization');
+  
+  if (!REVALIDATE_SECRET) {
     console.error('❌ REVALIDATE_SECRET_TOKEN is not configured');
     return NextResponse.json(
       { error: 'Server configuration error' },
@@ -17,8 +38,11 @@ const authHeader = request.headers.get('x-microcms-signature') ||
     );
   }
 
-  if (authHeader !== `Bearer ${secret}`) {
+  // Bearerトークンまたは直接トークンをチェック
+  const token = authHeader?.replace('Bearer ', '');
+  if (token !== REVALIDATE_SECRET) {
     console.warn('⚠️ Unauthorized revalidation attempt');
+    console.warn('Received token:', token?.substring(0, 10) + '...');
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
@@ -26,152 +50,183 @@ const authHeader = request.headers.get('x-microcms-signature') ||
   }
 
   try {
-    const body = await request.json();
-    console.log('📥 Webhook received:', JSON.stringify(body, null, 2));
+    const body: any = await request.json();
+    
+    // Vercelログに詳細を出力
+    console.log('📥 Webhook received at:', new Date().toISOString());
+    console.log('📦 Payload:', JSON.stringify(body, null, 2));
 
-    let api: string | undefined;
-    let id: string | undefined;
-    let slug: string | undefined;
+    // microCMSのペイロード構造に対応
+    let api = body.api;
+    let id = body.id;
+    let type = body.type;
+    let contents = body.contents;
 
-    if (body.type) {
-      api = body.type;
-      id = body.id;
-      slug = body.slug;
-    } else if (body.contents) {
-      const content = body.contents.new?.publishValue || body.contents.old?.publishValue || body.contents.new || body.contents.old;
-      api = body.api;
-      id = content?.id || body.id;
-      slug = content?.slug;
-    } else {
-      api = body.api;
-      id = body.id;
-      slug = body.slug;
+    // typeが "edit", "new", "delete" の場合は、apiをデフォルトで "posts" にする
+    // 実際のペイロードを見て調整が必要
+    if (!api && (type === 'edit' || type === 'new' || type === 'delete')) {
+      console.warn('⚠️ api field is missing, attempting to infer from type:', type);
+      // ペイロード全体をログに出力して確認
+      console.log('Full payload keys:', Object.keys(body));
     }
 
     if (!api) {
       console.error('❌ Missing api field in webhook payload');
+      console.error('Available fields:', Object.keys(body));
       return NextResponse.json(
-        { error: 'Invalid payload: missing api field' },
+        { error: 'Invalid payload: missing api field', receivedFields: Object.keys(body) },
         { status: 400 }
       );
     }
 
-    console.log('🔄 Processing revalidation:', { api, id, slug });
+    // slugの取得（新規コンテンツまたは旧コンテンツから）
+    const slug = contents?.new?.slug || contents?.old?.slug;
 
-    // APIの種類に応じて処理
+    console.log('🔄 Processing revalidation:', { 
+      api, 
+      id, 
+      slug, 
+      type 
+    });
+
+    // API種別ごとの再検証処理
     switch (api) {
       case 'posts':
-      case 'article':
-        // @ts-expect-error Expected 2 arguments, but got 1.
+        console.log('📝 Revalidating posts...');
         revalidateTag('articles');
+        
         if (slug) {
-          // @ts-expect-error Expected 2 arguments, but got 1.
           revalidateTag(`article-${slug}`);
-          revalidatePath(`/posts/${slug}`);
-          console.log(`✅ Article revalidated: /posts/${slug}`);
-        } else if (id) {
-          // @ts-expect-error Expected 2 arguments, but got 1.
-          revalidateTag(`article-${id}`);
-          console.log(`✅ Article revalidated by ID: ${id}`);
+          revalidatePath(`/posts/${slug}`, 'page');
+          console.log(`✅ Article path revalidated: /posts/${slug}`);
         }
-        revalidatePath('/');
-        // @ts-expect-error Expected 2 arguments, but got 1.
+        
+        if (id) {
+          revalidateTag(`article-${id}`);
+          console.log(`✅ Article tag revalidated: article-${id}`);
+        }
+
+        // トップページとカテゴリも更新
+        revalidatePath('/', 'page');
         revalidateTag('categories');
-        console.log('✅ Articles and related pages revalidated');
+        
+        console.log('✅ Posts revalidation completed');
         break;
 
       case 'categories':
-      case 'category':
-        // @ts-expect-error Expected 2 arguments, but got 1.
+        console.log('📁 Revalidating categories...');
         revalidateTag('categories');
-        // @ts-expect-error Expected 2 arguments, but got 1.
-        revalidateTag('articles');
+        revalidateTag('articles'); // 記事にカテゴリ情報が含まれるため
+        
         if (id) {
-          // @ts-expect-error Expected 2 arguments, but got 1.
           revalidateTag(`category-${id}`);
-          // @ts-expect-error Expected 2 arguments, but got 1.
           revalidateTag(`category-posts-${id}`);
+          console.log(`✅ Category tags revalidated: ${id}`);
         }
+        
         if (slug) {
-          revalidatePath(`/category/${slug}`);
-          console.log(`✅ Category revalidated: /category/${slug}`);
+          revalidatePath(`/category/${slug}`, 'page');
+          console.log(`✅ Category path revalidated: /category/${slug}`);
         }
-        revalidatePath('/');
-        console.log('✅ Categories and related pages revalidated');
+        
+        revalidatePath('/', 'page');
+        console.log('✅ Categories revalidation completed');
         break;
 
       case 'tags':
-      case 'tag':
-        // @ts-expect-error Expected 2 arguments, but got 1.
+        console.log('🏷️ Revalidating tags...');
         revalidateTag('tags');
-        // @ts-expect-error Expected 2 arguments, but got 1.
-        revalidateTag('articles');
-        revalidatePath('/');
-        console.log('✅ Tags and related pages revalidated');
+        revalidateTag('articles'); // 記事にタグ情報が含まれるため
+        revalidatePath('/', 'page');
+        console.log('✅ Tags revalidation completed');
         break;
 
-      case 'all':
-        // @ts-expect-error Expected 2 arguments, but got 1.
-        revalidateTag('articles');
-        // @ts-expect-error Expected 2 arguments, but got 1.
-        revalidateTag('categories');
-        // @ts-expect-error Expected 2 arguments, but got 1.
-        revalidateTag('tags');
-        // @ts-expect-error Expected 2 arguments, but got 1.
+      case 'profile':
+        console.log('👤 Revalidating profile...');
         revalidateTag('profile');
-        revalidatePath('/');
-        console.log('✅ All caches revalidated');
+        revalidatePath('/', 'page');
+        console.log('✅ Profile revalidation completed');
         break;
 
       default:
         console.warn(`⚠️ Unknown api type: ${api}`);
-        return NextResponse.json(
-          { error: `Unknown api type: ${api}` },
-          { status: 400 }
-        );
+        console.log('Attempting fallback revalidation for all content');
+        // 不明なAPIでも全体を再検証
+        revalidateTag('articles');
+        revalidateTag('categories');
+        revalidateTag('tags');
+        revalidatePath('/', 'page');
+        console.log('✅ Fallback revalidation completed');
+        break;
     }
 
-    return NextResponse.json({
+    const response = {
       revalidated: true,
-      now: Date.now(),
+      timestamp: new Date().toISOString(),
       api,
       id,
       slug,
-    });
+      type,
+    };
+
+    console.log('✨ Revalidation response:', response);
+    return NextResponse.json(response);
+
   } catch (error) {
     console.error('❌ Revalidation error:', error);
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
     return NextResponse.json(
       { 
         error: 'Internal server error', 
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
+        timestamp: new Date().toISOString(),
       },
       { status: 500 }
     );
   }
 }
 
-// テスト用GETエンドポイント
+// テスト用GETエンドポイント（開発時のみ使用）
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const secret = searchParams.get('secret');
-  const type = searchParams.get('type') || 'all';
+  const api = searchParams.get('api') || 'posts';
+  const id = searchParams.get('id') || 'test-id';
+  const slug = searchParams.get('slug');
 
-  if (secret !== process.env.REVALIDATE_SECRET_TOKEN) {
+  if (!REVALIDATE_SECRET || secret !== REVALIDATE_SECRET) {
     return NextResponse.json(
       { error: 'Unauthorized' },
       { status: 401 }
     );
   }
 
-  // POSTと同じロジックを呼び出す
+  console.log('🧪 Test revalidation request:', { api, id, slug });
+
+  // テスト用のモックペイロード
+  const mockPayload: MicroCMSWebhookPayload = {
+    service: 'test-service',
+    api,
+    id,
+    type: 'edit',
+    contents: slug ? {
+      new: { id, slug }
+    } : undefined,
+  };
+
   const mockRequest = new Request(request.url, {
     method: 'POST',
     headers: {
-      'x-authorization': `Bearer ${secret}`, // ヘッダー名を 'x-authorization' に修正
+      'x-authorization': `Bearer ${secret}`,
       'content-type': 'application/json',
     },
-    body: JSON.stringify({ type }),
+    body: JSON.stringify(mockPayload),
   });
 
   return POST(mockRequest as NextRequest);
 }
+
+// Vercelのエッジランタイム設定（オプション）
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
