@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   // セキュリティ: シークレットトークンで認証
-  const authHeader = request.headers.get('x-authorization');
+// 認証チェック(大文字小文字両方に対応)
+const authHeader = request.headers.get('x-microcms-signature') || 
+                   request.headers.get('x-authorization') ||
+                   request.headers.get('X-Authorization');  
   const secret = process.env.REVALIDATE_SECRET_TOKEN;
 
   if (!secret) {
