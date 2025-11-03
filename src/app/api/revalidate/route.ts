@@ -4,26 +4,6 @@ import { NextRequest, NextResponse } from 'next/server';
 // Vercel環境変数の型定義
 const REVALIDATE_SECRET = process.env.REVALIDATE_SECRET_TOKEN;
 
-// microCMS Webhookペイロードの型定義
-type MicroCMSWebhookPayload = {
-  service: string;
-  api: string;
-  id: string;
-  type: 'new' | 'edit' | 'delete';
-  contents?: {
-    old?: {
-      id: string;
-      slug?: string;
-      [key: string]: any;
-    };
-    new?: {
-      id: string;
-      slug?: string;
-      [key: string]: any;
-    };
-  };
-};
-
 export async function POST(request: NextRequest) {
   // 認証チェック(大文字小文字両方に対応)
   const authHeader = request.headers.get('x-microcms-signature') || 
@@ -93,34 +73,34 @@ export async function POST(request: NextRequest) {
     switch (api) {
       case 'posts':
         console.log('📝 Revalidating posts...');
-        revalidateTag('articles');
+        revalidateTag('articles', 'fetch');
         
         if (slug) {
-          revalidateTag(`article-${slug}`);
+          revalidateTag(`article-${slug}`, 'fetch');
           revalidatePath(`/posts/${slug}`, 'page');
           console.log(`✅ Article path revalidated: /posts/${slug}`);
         }
         
         if (id) {
-          revalidateTag(`article-${id}`);
+          revalidateTag(`article-${id}`, 'fetch');
           console.log(`✅ Article tag revalidated: article-${id}`);
         }
 
         // トップページとカテゴリも更新
         revalidatePath('/', 'page');
-        revalidateTag('categories');
+        revalidateTag('categories', 'fetch');
         
         console.log('✅ Posts revalidation completed');
         break;
 
       case 'categories':
         console.log('📁 Revalidating categories...');
-        revalidateTag('categories');
-        revalidateTag('articles'); // 記事にカテゴリ情報が含まれるため
+        revalidateTag('categories', 'fetch');
+        revalidateTag('articles', 'fetch'); // 記事にカテゴリ情報が含まれるため
         
         if (id) {
-          revalidateTag(`category-${id}`);
-          revalidateTag(`category-posts-${id}`);
+          revalidateTag(`category-${id}`, 'fetch');
+          revalidateTag(`category-posts-${id}`, 'fetch');
           console.log(`✅ Category tags revalidated: ${id}`);
         }
         
@@ -135,15 +115,15 @@ export async function POST(request: NextRequest) {
 
       case 'tags':
         console.log('🏷️ Revalidating tags...');
-        revalidateTag('tags');
-        revalidateTag('articles'); // 記事にタグ情報が含まれるため
+        revalidateTag('tags', 'fetch');
+        revalidateTag('articles', 'fetch'); // 記事にタグ情報が含まれるため
         revalidatePath('/', 'page');
         console.log('✅ Tags revalidation completed');
         break;
 
       case 'profile':
         console.log('👤 Revalidating profile...');
-        revalidateTag('profile');
+        revalidateTag('profile', 'fetch');
         revalidatePath('/', 'page');
         console.log('✅ Profile revalidation completed');
         break;
@@ -152,9 +132,9 @@ export async function POST(request: NextRequest) {
         console.warn(`⚠️ Unknown api type: ${api}`);
         console.log('Attempting fallback revalidation for all content');
         // 不明なAPIでも全体を再検証
-        revalidateTag('articles');
-        revalidateTag('categories');
-        revalidateTag('tags');
+        revalidateTag('articles', 'fetch');
+        revalidateTag('categories', 'fetch');
+        revalidateTag('tags', 'fetch');
         revalidatePath('/', 'page');
         console.log('✅ Fallback revalidation completed');
         break;
@@ -205,11 +185,11 @@ export async function GET(request: NextRequest) {
   console.log('🧪 Test revalidation request:', { api, id, slug });
 
   // テスト用のモックペイロード
-  const mockPayload: MicroCMSWebhookPayload = {
+  const mockPayload = {
     service: 'test-service',
     api,
     id,
-    type: 'edit',
+    type: 'edit' as const,
     contents: slug ? {
       new: { id, slug }
     } : undefined,
@@ -227,6 +207,6 @@ export async function GET(request: NextRequest) {
   return POST(mockRequest as NextRequest);
 }
 
-// Vercelのエッジランタイム設定（オプション）
+// Vercelのエッジランタイム設定
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
