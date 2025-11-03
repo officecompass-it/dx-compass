@@ -73,34 +73,34 @@ export async function POST(request: NextRequest) {
     switch (api) {
       case 'posts':
         console.log('📝 Revalidating posts...');
-        revalidateTag('articles', 'fetch');
+        revalidateTag('articles');
         
         if (slug) {
-          revalidateTag(`article-${slug}`, 'fetch');
+          revalidateTag(`article-${slug}`);
           revalidatePath(`/posts/${slug}`, 'page');
           console.log(`✅ Article path revalidated: /posts/${slug}`);
         }
         
         if (id) {
-          revalidateTag(`article-${id}`, 'fetch');
+          revalidateTag(`article-${id}`);
           console.log(`✅ Article tag revalidated: article-${id}`);
         }
 
         // トップページとカテゴリも更新
         revalidatePath('/', 'page');
-        revalidateTag('categories', 'fetch');
+        revalidateTag('categories');
         
         console.log('✅ Posts revalidation completed');
         break;
 
       case 'categories':
         console.log('📁 Revalidating categories...');
-        revalidateTag('categories', 'fetch');
-        revalidateTag('articles', 'fetch'); // 記事にカテゴリ情報が含まれるため
+        revalidateTag('categories');
+        revalidateTag('articles'); // 記事にカテゴリ情報が含まれるため
         
         if (id) {
-          revalidateTag(`category-${id}`, 'fetch');
-          revalidateTag(`category-posts-${id}`, 'fetch');
+          revalidateTag(`category-${id}`);
+          revalidateTag(`category-posts-${id}`);
           console.log(`✅ Category tags revalidated: ${id}`);
         }
         
@@ -115,15 +115,15 @@ export async function POST(request: NextRequest) {
 
       case 'tags':
         console.log('🏷️ Revalidating tags...');
-        revalidateTag('tags', 'fetch');
-        revalidateTag('articles', 'fetch'); // 記事にタグ情報が含まれるため
+        revalidateTag('tags');
+        revalidateTag('articles'); // 記事にタグ情報が含まれるため
         revalidatePath('/', 'page');
         console.log('✅ Tags revalidation completed');
         break;
 
       case 'profile':
         console.log('👤 Revalidating profile...');
-        revalidateTag('profile', 'fetch');
+        revalidateTag('profile');
         revalidatePath('/', 'page');
         console.log('✅ Profile revalidation completed');
         break;
@@ -132,9 +132,9 @@ export async function POST(request: NextRequest) {
         console.warn(`⚠️ Unknown api type: ${api}`);
         console.log('Attempting fallback revalidation for all content');
         // 不明なAPIでも全体を再検証
-        revalidateTag('articles', 'fetch');
-        revalidateTag('categories', 'fetch');
-        revalidateTag('tags', 'fetch');
+        revalidateTag('articles');
+        revalidateTag('categories');
+        revalidateTag('tags');
         revalidatePath('/', 'page');
         console.log('✅ Fallback revalidation completed');
         break;
