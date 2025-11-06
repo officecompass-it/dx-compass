@@ -33,7 +33,12 @@ export const ArticleCarousel = ({ title, articles, viewMoreLink }: Props) => {
       </div>
       <HorizontalScrollContainer>
         {articles.map((post) => (
-          <ArticleCard key={post.id} article={post} variant="carousel" />
+          <ArticleCard 
+          key={post.id} 
+          article={post} 
+          variant="carousel"
+          priority={priorityIndices.includes(index)}
+          />
         ))}
       </HorizontalScrollContainer>
     </section>

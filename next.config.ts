@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     MICROCMS_API_KEY: process.env.MICROCMS_API_KEY,
   },
   images: {
+     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
