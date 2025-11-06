@@ -13,7 +13,6 @@
 
 @layer components {
   /* --- 縦棒スタイル (h1, h4に適用) --- */
-  /* h3をセレクタから削除 */
   .prose :is(h1, h4) {
     position: relative;
     padding-left: 1em;
@@ -33,10 +32,11 @@
   .prose h2 {
     position: relative;
     padding-bottom: 0.5em;
-    width: max-content; /* テキストの長さにぴったり合わせる */
-    max-width: 100%; /* コンテナをはみ出さないように制限 */
+    width: max-content;
+    max-width: 100%;
   }
 
+  /* ▼▼▼ 修正: linear-gradient を background-color に変更 ▼▼▼ */
   .prose h2::after {
     content: '';
     position: absolute;
@@ -44,11 +44,13 @@
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(to right, #3b82f6 100%);
+    background-color: #3b82f6; /* 単色の場合はこちらが適切 */
   }
+  /* ▲▲▲ 修正 ▲▲▲ */
+
   /* --- フォントサイズの上書き --- */
   .prose h1, .prose-lg h1 {
-    font-size: 28px !important; /* !importantで確実に上書き */
+    font-size: 28px !important;
   }
   .prose h2, .prose-lg h2 {
     font-size: 22px !important;
