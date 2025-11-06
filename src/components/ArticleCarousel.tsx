@@ -4,18 +4,18 @@ import { HorizontalScrollContainer } from './HorizontalScrollContainer';
 import type { Article } from '@/lib/microcms';
 
 type Props = {
-  title: string; // "最新記事" や "AI" などのセクションタイトル
+  title: string;
   articles: Article[];
-  viewMoreLink?: string; // "もっと見る" のリンク先URL (任意)
+  viewMoreLink?: string;
   priorityIndices?: number[];
 };
 
-export const ArticleCarousel = ({ title, articles, viewMoreLink }: Props) => {
+// ▼▼▼ 修正: 引数でpropsを分割代入する ▼▼▼
+export const ArticleCarousel = ({ title, articles, viewMoreLink, priorityIndices = [] }: Props) => {
   return (
     <section>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl md:text-3xl font-bold">
-          {/* リンクがある場合はタイトル全体をリンクにする */}
           {viewMoreLink ? (
             <Link href={viewMoreLink} className="hover:underline">
               {title}
@@ -24,7 +24,6 @@ export const ArticleCarousel = ({ title, articles, viewMoreLink }: Props) => {
             title
           )}
         </h2>
-        {/* リンクがある場合のみ「もっと見る」を表示 */}
         {viewMoreLink && (
           <Link href={viewMoreLink} className="text-sm font-semibold text-indigo-600 hover:text-indigo-800">
             もっと見る ›
@@ -32,12 +31,12 @@ export const ArticleCarousel = ({ title, articles, viewMoreLink }: Props) => {
         )}
       </div>
       <HorizontalScrollContainer>
-        {articles.map((post) => (
+        {articles.map((post, index) => (
           <ArticleCard 
-          key={post.id} 
-          article={post} 
-          variant="carousel"
-          priority={priorityIndices.includes(index)}
+            key={post.id} 
+            article={post} 
+            variant="carousel" 
+            priority={priorityIndices.includes(index)} // これで正しく動作する
           />
         ))}
       </HorizontalScrollContainer>
