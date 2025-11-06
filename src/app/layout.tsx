@@ -9,12 +9,12 @@ import { getHierarchicalCategories } from '@/lib/microcms';
 const notoSansJp = localFont({
   src: [
     {
-      path: './fonts/noto-sans-jp-v52-japanese-regular.woff2',
+      path: './fonts/noto-sans-jp-v55-japanese_latin-regular.woff2',
       weight: '400',
       style: 'normal',
     },
     {
-      path: './fonts/noto-sans-jp-v52-japanese-700.woff2',
+      path: './fonts/noto-sans-jp-v55-japanese_latin-700.woff2',
       weight: '700',
       style: 'normal',
     },
