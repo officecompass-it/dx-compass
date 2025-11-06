@@ -67,7 +67,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ja">
-      <body className={`${notoSansJp.className} flex flex-col min-h-screen`}>
+      <body className={`${notoSansJp.variable} flex flex-col min-h-screen`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
