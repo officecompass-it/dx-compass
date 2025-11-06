@@ -5,8 +5,14 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
-const notoSansJp = Noto_Sans_JP({ subsets: ['latin'], weight: ['400', '700'] });
-const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
+
+const notoSansJp = Noto_Sans_JP({ 
+  weight: ['400', '700'],
+  display: 'swap'
+
+});
+
+  const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
