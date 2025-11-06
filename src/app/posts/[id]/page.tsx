@@ -117,7 +117,9 @@ export default async function ArticleDetail({ params }: Props) {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    // 外側のコンテナは、左右のpadding(px-4)と上下のpadding(py-8)のみを担当
+    <div className="px-4 py-8">
+      {/* 内側のコンテナが、最大幅(max-w-2xl)と中央揃え(mx-auto)を担当 */}
       <div className="max-w-2xl mx-auto">
         <Breadcrumbs items={breadcrumbItems} />
         <script
@@ -146,7 +148,7 @@ export default async function ArticleDetail({ params }: Props) {
                   alt={article.title || '記事のアイキャッチ画像'}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 672px) 100vw, 672px"
+                  sizes="(max-width: 768px) 100vw, 672px"
                   priority
                 />
               </div>
