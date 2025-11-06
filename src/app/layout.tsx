@@ -1,28 +1,15 @@
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
+import { Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
 
-const notoSansJp = localFont({
-  src: [
-    {
-      path: './fonts/noto-sans-jp-v55-japanese_latin-regular.woff2',
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: './fonts/noto-sans-jp-v55-japanese_latin-700.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
+const notoSansJp = Noto_Sans_JP({ 
+  weight: ['400', '700'],
   display: 'swap',
-  variable: '--font-noto-sans-jp',
 });
-
 
   const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
 
@@ -67,7 +54,7 @@ export default async function RootLayout({
 
   return (
     <html lang="ja">
-      <body className={`${notoSansJp.variable} flex flex-col min-h-screen`}>
+        <body className={`${notoSansJp.className} flex flex-col min-h-screen`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
