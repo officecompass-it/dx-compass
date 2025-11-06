@@ -1,16 +1,27 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_JP } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
 
-const notoSansJp = Noto_Sans_JP({ 
-  weight: ['400', '700'],
-  display: 'swap'
-
+const notoSansJp = localFont({
+  src: [
+    {
+      path: './fonts/noto-sans-jp-v52-japanese-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './fonts/noto-sans-jp-v52-japanese-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  display: 'swap',
 });
+
 
   const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
 
