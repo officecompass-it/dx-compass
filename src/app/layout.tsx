@@ -20,6 +20,7 @@ const notoSansJp = localFont({
     },
   ],
   display: 'swap',
+  variable: '--font-noto-sans-jp',
 });
 
 
