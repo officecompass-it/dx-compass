@@ -42,7 +42,6 @@ export const ArticleCard = ({ article, variant = 'grid', priority = false }: Pro
           )}
           {hasPublishedDate && (
              <time dateTime={article.publishedAt} className="text-xs text-gray-500 mt-auto pt-3">
-                {/* ★ 修正: non-null assertion (!) を追加 */}
                 {formatDate(article.publishedAt!)}
             </time>
           )}

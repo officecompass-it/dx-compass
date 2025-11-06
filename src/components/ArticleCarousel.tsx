@@ -10,7 +10,6 @@ type Props = {
   priorityIndices?: number[];
 };
 
-// ▼▼▼ 修正: 引数でpropsを分割代入する ▼▼▼
 export const ArticleCarousel = ({ title, articles, viewMoreLink, priorityIndices = [] }: Props) => {
   return (
     <section>
@@ -36,7 +35,7 @@ export const ArticleCarousel = ({ title, articles, viewMoreLink, priorityIndices
             key={post.id} 
             article={post} 
             variant="carousel" 
-            priority={priorityIndices.includes(index)} // これで正しく動作する
+            priority={priorityIndices.includes(index)}
           />
         ))}
       </HorizontalScrollContainer>
