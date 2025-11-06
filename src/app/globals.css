@@ -12,26 +12,48 @@
 }
 
 @layer components {
-  /* 独自機能: 見出しに左側の縦棒を追加 */
-  .prose h1,
-  .prose h2,
-  .prose h3,
-  .prose h4 {
+  /* --- 縦棒スタイル (h1, h4に適用) --- */
+  /* h3をセレクタから削除 */
+  .prose :is(h1, h4) {
     position: relative;
     padding-left: 1em;
   }
-
-  .prose h1::before,
-  .prose h2::before,
-  .prose h3::before,
-  .prose h4::before {
+  .prose :is(h1, h4)::before {
     content: '';
     position: absolute;
     left: 0;
     top: 0;
     width: 0.25em;
     height: 100%;
-    background-color: #3b82f6;
+    background-color: #3b82f6; /* 青色 */
     border-radius: 2px;
+  }
+
+  /* --- h2 (中タイトル) の下線スタイル --- */
+  .prose h2 {
+    position: relative;
+    padding-bottom: 0.5em;
+    width: max-content; /* テキストの長さにぴったり合わせる */
+    max-width: 100%; /* コンテナをはみ出さないように制限 */
+  }
+
+  .prose h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(to right, #3b82f6 100%);
+  }
+  /* --- フォントサイズの上書き --- */
+  .prose h1, .prose-lg h1 {
+    font-size: 28px !important; /* !importantで確実に上書き */
+  }
+  .prose h2, .prose-lg h2 {
+    font-size: 22px !important;
+  }
+  .prose h3, .prose-lg h3 {
+    font-size: 18px !important;
   }
 }
