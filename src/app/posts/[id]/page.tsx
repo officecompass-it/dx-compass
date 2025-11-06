@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { formatDate } from '@/utils/formatDate';
 import type { Article } from '@/lib/microcms';
+import styles from './prose-styles.module.css'; 
 
 // サイトURLを安全に構築するヘルパー関数
 const getSiteUrl = () => {
@@ -157,7 +158,7 @@ export default async function ArticleDetail({ params }: Props) {
 
           <div
             dangerouslySetInnerHTML={{ __html: article.body || '' }}
-            className="prose max-w-none prose-indigo prose-lg"
+            className={`prose max-w-none prose-indigo prose-lg ${styles.prose}`}
           />
         </article>
       </div>
