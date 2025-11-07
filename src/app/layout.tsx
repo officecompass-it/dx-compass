@@ -11,7 +11,20 @@ const notoSansJp = Noto_Sans_JP({
   display: 'swap',
 });
 
-  const siteUrl = process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000';
+const getSiteUrl = () => {
+  if (process.env.VERCEL_ENV === 'production') {
+    // 本番環境（カスタムドメイン）
+    return 'https://dx-no-rashinban.com';
+  } else if (process.env.VERCEL_URL) {
+    // Vercelのプレビュー環境
+    return `https://${process.env.VERCEL_URL}`;
+  } else {
+    // ローカルの開発環境
+    return 'http://localhost:3000';
+  }
+};
+
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -22,10 +35,10 @@ export const metadata: Metadata = {
     default: 'DXの羅針盤',
     template: `%s | DXの羅針盤`,
   },
-  description: 'AppSheetやGoogle Workspaceの最新技術情報、実践的な活用ノウハウを発信する専門技術ブログサイト。',
+  description: '「DXの羅針盤」は、ノーコード、Googleツール、生成AIを活用したい非エンジニアのための、IT活用ノウハウブログです。AppSheetによるアプリ開発、Looker Studioでのデータ可視化、AIによる業務効率化など、プログラミング不要で実践できるノウハウを具体的に紹介します。',
   openGraph: {
     title: 'DXの羅針盤',
-    description: 'AppSheetやGoogle Workspaceの最新技術情報、実践的な活用ノウハウを発信する専門技術ブログサイト。',
+    description: '「DXの羅針盤」は、ノーコード、Googleツール、生成AIを活用したい非エンジニアのための、IT活用ノウハウブログです。AppSheetによるアプリ開発、Looker Studioでのデータ可視化、AIによる業務効率化など、プログラミング不要で実践できるノウハウを具体的に紹介します。',
     images: '/default-og-image.png',
   },
 };
@@ -40,14 +53,14 @@ export default async function RootLayout({
     (category) => category.name !== '最新情報'
   );
 
-  const jsonLd = {
+const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     'name': 'DXの羅針盤',
-    'url': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+    'url': siteUrl, // process.env.NEXT_PUBLIC_SITE_URL から siteUrl に変更
     'potentialAction': {
       '@type': 'SearchAction',
-      'target': `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/search?q={search_term_string}`,
+      'target': `${siteUrl}/search?q={search_term_string}`, // こちらも siteUrl に変更
       'query-input': 'required name=search_term_string',
     },
   };
