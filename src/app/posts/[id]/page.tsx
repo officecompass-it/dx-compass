@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { formatDate } from '@/utils/formatDate';
 import type { Article } from '@/lib/microcms';
-import styles from './prose-styles.module.css'; 
+import styles from './prose-styles.module.css';
+import * as cheerio from 'cheerio'; // ★ cheerioライブラリをインポート
 
 // サイトURLを安全に構築するヘルパー関数
 const getSiteUrl = () => {
@@ -20,7 +21,7 @@ type ArticleWithNoIndex = Article & {
   noindex?: boolean;
 };
 
-// メタデータ生成
+// メタデータ生成 (変更なし)
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const article = await getArticleDetail<ArticleWithNoIndex>(resolvedParams.id).catch(() => null);
@@ -59,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return metadata;
 }
 
-// 静的パス生成
+// 静的パス生成 (変更なし)
 export async function generateStaticParams() {
   const { contents } = await getArticles({ fields: ['id'] });
   return contents.map((article) => ({
@@ -83,12 +84,11 @@ export default async function ArticleDetail({ params }: Props) {
     { name: 'ホーム', href: '/' },
   ];
   if (article.category) {
-    // カテゴリのリンク先を slug に修正
     breadcrumbItems.push({ name: article.category.name, href: `/category/${article.category.slug}` });
   }
   breadcrumbItems.push({ name: article.title, href: `/posts/${article.id}` });
 
-  // JSON-LD (構造化データ) の拡充
+  // JSON-LD (構造化データ) の拡充 (変更なし)
   const siteUrl = getSiteUrl();
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -117,10 +117,36 @@ export default async function ArticleDetail({ params }: Props) {
     },
   };
 
+  // ★ここから変更: cheerioを使ってサーバーサイドでHTMLを加工
+  const processHtmlBody = (html: string | undefined): string => {
+    if (!html) {
+      return '';
+    }
+    const $ = cheerio.load(html);
+
+    // 1. 全ての<table>タグを検索
+    $('table').each((_, tableEl) => {
+      const $table = $(tableEl);
+      
+      // 2. <table>を<div class="table-wrapper">でラップする
+      $table.wrap('<div class="table-wrapper"></div>');
+      
+      // 3. テーブル内の各行(<tr>)を検索
+      $table.find('tr').each((_, rowEl) => {
+        // 4. 各行の最初のヘッダーセル(<th>)またはデータセル(<td>)に、
+        //    CSS Modulesからインポートしたクラス名を追加する
+        $(rowEl).find('th:first-child, td:first-child').addClass(styles.stickyColumn);
+      });
+    });
+    
+    return $.html();
+  };
+
+  // ★以前の.replace()による処理を、新しい関数呼び出しに置き換え
+  const processedBody = processHtmlBody(article.body);
+
   return (
-    // 外側のコンテナは、左右のpadding(px-4)と上下のpadding(py-8)のみを担当
     <div className="px-4 py-8">
-      {/* 内側のコンテナが、最大幅(max-w-2xl)と中央揃え(mx-auto)を担当 */}
       <div className="max-w-2xl mx-auto">
         <Breadcrumbs items={breadcrumbItems} />
         <script
@@ -157,8 +183,8 @@ export default async function ArticleDetail({ params }: Props) {
           )}
 
           <div
-            dangerouslySetInnerHTML={{ __html: article.body || '' }}
-            className={`prose max-w-none prose-indigo prose-lg ${styles.prose}`}
+            dangerouslySetInnerHTML={{ __html: processedBody }}
+            className={`prose max-w-none prose-indigo prose-lg ${styles.prose} relative`}
           />
         </article>
       </div>
