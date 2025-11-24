@@ -5,21 +5,20 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
-
+// 修正点: variableを追加し、subsetsを明示
 const notoSansJp = Noto_Sans_JP({ 
   weight: ['400', '700'],
+  subsets: ['latin'], // 日本語フォントでもlatinを含めるのが一般的
   display: 'swap',
+  variable: '--font-noto-sans-jp', // CSS変数名を定義
 });
 
 const getSiteUrl = () => {
   if (process.env.VERCEL_ENV === 'production') {
-    // 本番環境（カスタムドメイン）
     return 'https://dx-no-rashinban.com';
   } else if (process.env.VERCEL_URL) {
-    // Vercelのプレビュー環境
     return `https://${process.env.VERCEL_URL}`;
   } else {
-    // ローカルの開発環境
     return 'http://localhost:3000';
   }
 };
@@ -57,17 +56,18 @@ const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     'name': 'DXの羅針盤',
-    'url': siteUrl, // process.env.NEXT_PUBLIC_SITE_URL から siteUrl に変更
+    'url': siteUrl, 
     'potentialAction': {
       '@type': 'SearchAction',
-      'target': `${siteUrl}/search?q={search_term_string}`, // こちらも siteUrl に変更
+      'target': `${siteUrl}/search?q={search_term_string}`, 
       'query-input': 'required name=search_term_string',
     },
   };
 
   return (
-    <html lang="ja">
-        <body className={`${notoSansJp.className} flex flex-col min-h-screen`}>
+    // 修正点: htmlタグに変数クラスを適用し、bodyにはTailwindのクラスを適用
+    <html lang="ja" className={notoSansJp.variable}>
+        <body className="font-sans antialiased flex flex-col min-h-screen">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

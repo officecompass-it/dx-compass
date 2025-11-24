@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* 追加: フォント変数の紐付け */
+@theme {
+  --font-sans: var(--font-noto-sans-jp), "Noto Sans JP", sans-serif;
+}
+
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
@@ -10,8 +15,3 @@
     display: none;
   }
 }
-
-/* 
-  v4では @theme ブロックを使って変数を定義できますが、
-  現状の要件ではデフォルトのままで問題ありません。
-*/
