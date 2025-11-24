@@ -1,17 +1,17 @@
 @import "tailwindcss";
-/* @plugin "@tailwindcss/typography"; はコメントアウトまたは削除したまま */
+@plugin "@tailwindcss/typography";
 
 @layer utilities {
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
-    &::-webkit-scrollbar {
-      display: none;
-    }
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }
 
-/* @layer components 内は空にするか、prose以外のカスタムコンポーネントスタイルがあれば残します */
-@layer components {
-  /* .prose関連のスタイルはここからすべて削除されました */
-}
+/* 
+  v4では @theme ブロックを使って変数を定義できますが、
+  現状の要件ではデフォルトのままで問題ありません。
+*/
