@@ -1,16 +1,28 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_JP } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
-// 修正点: variableを追加し、subsetsを明示
-const notoSansJp = Noto_Sans_JP({ 
-  weight: ['400', '700'],
-  subsets: ['latin'], // 日本語フォントでもlatinを含めるのが一般的
+// セルフホスティングフォントに変更（高速化）
+const notoSansJp = localFont({
+  src: [
+    {
+      path: './fonts/noto-sans-jp-v55-japanese_latin-regular.woff2',
+      weight: '400',
+      style: 'normal',
+    },
+    {
+      path: './fonts/noto-sans-jp-v55-japanese_latin-700.woff2',
+      weight: '700',
+      style: 'normal',
+    },
+  ],
+  variable: '--font-noto-sans-jp',
   display: 'swap',
-  variable: '--font-noto-sans-jp', // CSS変数名を定義
+  preload: true,
+  fallback: ['system-ui', 'sans-serif'],
 });
 
 const getSiteUrl = () => {
@@ -47,27 +59,36 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-   const hierarchicalCategories = await getHierarchicalCategories();
+  const hierarchicalCategories = await getHierarchicalCategories();
   const filteredHierarchicalCategories = hierarchicalCategories.filter(
     (category) => category.name !== '最新情報'
   );
 
-const jsonLd = {
+  const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     'name': 'DXの羅針盤',
-    'url': siteUrl, 
+    'url': siteUrl,
     'potentialAction': {
       '@type': 'SearchAction',
-      'target': `${siteUrl}/search?q={search_term_string}`, 
+      'target': `${siteUrl}/search?q={search_term_string}`,
       'query-input': 'required name=search_term_string',
     },
   };
 
   return (
-    // 修正点: htmlタグに変数クラスを適用し、bodyにはTailwindのクラスを適用
     <html lang="ja" className={notoSansJp.variable}>
-        <body className="font-sans antialiased flex flex-col min-h-screen">
+      <head>
+        {/* フォントプリロード - 最重要フォントのみ */}
+        <link
+          rel="preload"
+          href="/fonts/noto-sans-jp-v55-japanese_latin-regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+      </head>
+      <body className="font-sans antialiased flex flex-col min-h-screen">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
