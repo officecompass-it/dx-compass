@@ -20,9 +20,9 @@ const notoSansJp = localFont({
     },
   ],
   variable: '--font-noto-sans-jp',
-  display: 'swap', // フォールバックフォントで先に表示
-  preload: false, // 自動最適化に任せる
-  adjustFontFallback: true, // レイアウトシフト防止
+  display: 'swap',
+  preload: false,
+  // adjustFontFallback: true, ← 削除（Next.js 16のTurbopackで未サポート）
   fallback: [
     'system-ui',
     '-apple-system',
@@ -32,7 +32,7 @@ const notoSansJp = localFont({
     'Yu Gothic',
     'Meiryo',
     'sans-serif',
-  ], // 日本語対応のフォールバックを充実
+  ],
 });
 
 const getSiteUrl = () => {
