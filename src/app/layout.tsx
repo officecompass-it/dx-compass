@@ -1,39 +1,19 @@
 // src/app/layout.tsx
 
 import type { Metadata } from 'next';
-import localFont from 'next/font/local';
+import { Noto_Sans_JP } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
-// パスを修正: src/app/layout.tsx から見た相対パス
-const notoSansJp = localFont({
-  src: [
-    {
-      path: './fonts/noto-sans-jp-v55-japanese_latin-regular.woff2', // ← 相対パスはこれでOK
-      weight: '400',
-      style: 'normal',
-    },
-    {
-      path: './fonts/noto-sans-jp-v55-japanese_latin-700.woff2',
-      weight: '700',
-      style: 'normal',
-    },
-  ],
-  variable: '--font-noto-sans-jp',
+// Google Fontsの自動最適化を利用
+const notoSansJp = Noto_Sans_JP({
+  weight: ['400', '700'],
+  subsets: ['latin'],
   display: 'swap',
-  preload: false,
-  fallback: [
-    'system-ui',
-    '-apple-system',
-    'BlinkMacSystemFont',
-    'Hiragino Sans',
-    'Hiragino Kaku Gothic ProN',
-    'Yu Gothic',
-    'Meiryo',
-    'sans-serif',
-  ],
+  variable: '--font-noto-sans-jp',
+  // Google Fontsは自動でサブセット化してくれる
 });
 
 const getSiteUrl = () => {
