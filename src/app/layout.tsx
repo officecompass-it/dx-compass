@@ -1,3 +1,5 @@
+// src/app/layout.tsx
+
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import './globals.css';
@@ -5,11 +7,11 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { getHierarchicalCategories } from '@/lib/microcms';
 
-// フォント設定を最適化
+// パスを修正: src/app/layout.tsx から見た相対パス
 const notoSansJp = localFont({
   src: [
     {
-      path: './fonts/noto-sans-jp-v55-japanese_latin-regular.woff2',
+      path: './fonts/noto-sans-jp-v55-japanese_latin-regular.woff2', // ← 相対パスはこれでOK
       weight: '400',
       style: 'normal',
     },
@@ -22,7 +24,6 @@ const notoSansJp = localFont({
   variable: '--font-noto-sans-jp',
   display: 'swap',
   preload: false,
-  // adjustFontFallback: true, ← 削除（Next.js 16のTurbopackで未サポート）
   fallback: [
     'system-ui',
     '-apple-system',
