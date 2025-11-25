@@ -11,7 +11,6 @@ type Props = {
   };
 };
 
-// slugからカテゴリ情報を取得するヘルパー関数
 const getCategoryBySlug = async (slug: string): Promise<Category | undefined> => {
   const data = await getCategories({ filters: `slug[equals]${slug}`, limit: 1, depth: 2 });
   return data.contents[0];
@@ -43,15 +42,12 @@ export default async function CategoryPage({ params }: Props) {
   let posts: Article[] = [];
   let breadcrumbItems = [];
 
-  // 親カテゴリーかどうかを判定
   if (!category.parent) {
-    // 親カテゴリーの場合のみ、子カテゴリーと記事を並列取得
     const [children, directPosts] = await Promise.all([
       getCategories({ 
         filters: `parent[equals]${category.id}`,
         limit: 100 
       }),
-      // 親カテゴリーに直接紐づく記事も取得（もしあれば）
       getArticles({ 
         limit: 100,
         filters: `category[equals]${category.id}`,
@@ -62,7 +58,6 @@ export default async function CategoryPage({ params }: Props) {
     const childrenIds = children.contents.map(c => c.id);
 
     if (childrenIds.length > 0) {
-      // 子カテゴリーの記事を取得
       const orFilters = childrenIds.map(id => `category[equals]${id}`).join('[or]');
       const childPosts = await getArticles({ 
         limit: 100,
@@ -70,14 +65,12 @@ export default async function CategoryPage({ params }: Props) {
         fields: 'id,title,slug,description,eyecatch,category,publishedAt,updatedAt'
       });
       
-      // 直接紐づく記事と子カテゴリーの記事をマージ（重複排除）
       const allPostsMap = new Map<string, Article>();
       [...directPosts.contents, ...childPosts.contents].forEach(post => {
         allPostsMap.set(post.id, post);
       });
       posts = Array.from(allPostsMap.values());
     } else {
-      // 子カテゴリーがない場合は直接紐づく記事のみ
       posts = directPosts.contents;
     }
     
@@ -87,7 +80,6 @@ export default async function CategoryPage({ params }: Props) {
     ];
 
   } else {
-    // 子カテゴリーの場合（シンプルに1回のリクエスト）
     const postsData = await getArticles({
       limit: 100,
       filters: `category[equals]${category.id}`,
@@ -117,8 +109,12 @@ export default async function CategoryPage({ params }: Props) {
         
         {posts.length > 0 ? (
           <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            {posts.map((post) => (
-              <ArticleCard key={post.id} article={post} />
+            {posts.map((post, index) => (
+              <ArticleCard 
+                key={post.id} 
+                article={post} 
+                priority={index === 0} // ← 追加: 最初の記事だけプリロード
+              />
             ))}
           </div>
         ) : (
