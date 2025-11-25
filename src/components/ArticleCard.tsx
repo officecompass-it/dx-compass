@@ -11,21 +11,26 @@ type Props = {
 
 export const ArticleCard = ({ article, variant = 'grid', priority = false }: Props) => {
   const hasPublishedDate = article.publishedAt;
-  // "h-full" で高さを親に合わせつつ、各要素のサイズを安定させる
   const cardClasses = "bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 flex flex-col relative hover:z-10 h-full";
+
+  // ★修正1: カルーセル(carousel)の時は、小さなサイズ(224px)だけを要求するように最適化
+  // これにより、不必要に巨大な画像のダウンロードを防ぎます
+  const imageSizes = variant === 'carousel'
+    ? '(max-width: 640px) 224px, 256px' 
+    : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
 
   return (
     <div className={cardClasses}>
       <Link href={`/posts/${article.id}`} className="block h-full flex flex-col">
-        {/* 修正: paddingハックを廃止し、aspect-video と bg-gray-200 を適用 */}
+        {/* 背景色(bg-gray-200)をつけて画像ロード前の白飛び/CLSを防止 */}
         <div className="relative w-full aspect-video bg-gray-200">
           <Image
             src={article.eyecatch?.url || '/no-image.png'}
             alt={article.title || '記事のアイキャッチ画像'}
             className="object-cover"
             fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority={priority}
+            sizes={imageSizes}     // ★最適化したサイズ変数を適用
+            priority={priority}    // ★重要: これがtrueなら fetchpriority="high" が付く
             quality={85} 
           />
         </div>
