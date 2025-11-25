@@ -11,6 +11,7 @@ const notoSansJp = Noto_Sans_JP({
   subsets: ['latin'], // 日本語フォントでもlatinを含めるのが一般的
   display: 'swap',
   variable: '--font-noto-sans-jp', // CSS変数名を定義
+  preload: true, 
 });
 
 const getSiteUrl = () => {

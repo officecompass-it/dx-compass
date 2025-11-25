@@ -20,7 +20,10 @@ export default async function HomePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="space-y-12">
-        <ArticleCarousel title="最新記事" articles={latestPosts} priorityIndices={[0, 1]} />
+        <ArticleCarousel 
+        title="最新記事" 
+        articles={latestPosts} 
+        priorityIndices={[0]} />
         
         {/* 親カテゴリーでループ */}
         {hierarchicalCategories.map((parentCategory) => {

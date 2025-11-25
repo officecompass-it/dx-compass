@@ -24,6 +24,7 @@ export const ArticleCard = ({ article, variant = 'grid', priority = false }: Pro
             width={article.eyecatch?.width || 1200}
             height={article.eyecatch?.height || 630}
             priority={priority}
+            quality={85} 
           />
         </div>
         <div className="p-4 md:p-5 flex flex-col flex-grow">
