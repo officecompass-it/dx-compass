@@ -42,7 +42,7 @@ export type HierarchicalCategory = Category & {
 };
 
 // ★追加: 一覧取得時の軽量化用フィールド定義 (将来のタグ実装も見越して tags を含める)
-export const LIST_FIELDS = ['id', 'title', 'publishedAt', 'eyecatch', 'category', 'tags'] as const;
+export const LIST_FIELDS = ['id', 'title', 'publishedAt', 'eyecatch', 'category', 'tags'] ;
 
 if (!process.env.MICROCMS_SERVICE_DOMAIN) {
   throw new Error("MICROCMS_SERVICE_DOMAIN is required");
