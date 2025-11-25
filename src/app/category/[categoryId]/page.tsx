@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
-import { getCategories, getArticles, getPostsByCategory } from '@/lib/microcms';
+// getPostsByCategory は現状使われていないため、getArticlesのみインポート
+import { getCategories, getArticles } from '@/lib/microcms';
 import { ArticleCard } from '@/components/ArticleCard';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { notFound } from 'next/navigation';
@@ -11,11 +12,13 @@ type Props = {
   };
 };
 
+// このヘルパー関数は変更なし
 const getCategoryBySlug = async (slug: string): Promise<Category | undefined> => {
   const data = await getCategories({ filters: `slug[equals]${slug}`, limit: 1, depth: 2 });
   return data.contents[0];
 };
 
+// generateMetadata は変更なし
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const category = await getCategoryBySlug(resolvedParams.categoryId);
@@ -30,9 +33,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+
+// ★★★ ここから下の CategoryPage コンポーネントを修正 ★★★
 export default async function CategoryPage({ params }: Props) {
   const resolvedParams = await params;
   const slug = resolvedParams.categoryId;
+
+  // 1. カテゴリー情報の取得 (これは必須)
   const category = await getCategoryBySlug(slug);
 
   if (!category) {
@@ -40,66 +47,47 @@ export default async function CategoryPage({ params }: Props) {
   }
   
   let posts: Article[] = [];
-  let breadcrumbItems = [];
-
+  
+  // 親カテゴリーの場合の処理
   if (!category.parent) {
-    const [children, directPosts] = await Promise.all([
-      getCategories({ 
-        filters: `parent[equals]${category.id}`,
-        limit: 100 
-      }),
-      getArticles({ 
-        limit: 100,
-        filters: `category[equals]${category.id}`,
-        fields: 'id,title,slug,description,eyecatch,category,publishedAt,updatedAt'
-      })
-    ]);
+    // 2. 子カテゴリーの一覧を取得
+    const children = await getCategories({ 
+      filters: `parent[equals]${category.id}`,
+      limit: 100,
+      fields: 'id', // 子カテゴリーの記事を取得するだけならIDのみで十分
+    });
 
-    const childrenIds = children.contents.map(c => c.id);
-
-    if (childrenIds.length > 0) {
-      const orFilters = childrenIds.map(id => `category[equals]${id}`).join('[or]');
-      const childPosts = await getArticles({ 
-        limit: 100,
-        filters: orFilters,
-        fields: 'id,title,slug,description,eyecatch,category,publishedAt,updatedAt'
-      });
-      
-      const allPostsMap = new Map<string, Article>();
-      [...directPosts.contents, ...childPosts.contents].forEach(post => {
-        allPostsMap.set(post.id, post);
-      });
-      posts = Array.from(allPostsMap.values());
-    } else {
-      posts = directPosts.contents;
-    }
-    
-    breadcrumbItems = [
-      { name: 'ホーム', href: '/' },
-      { name: category.name, href: `/category/${category.slug}` },
+    // 3. 親IDと全ての子IDを結合したIDリストを作成
+    const categoryIds = [
+      category.id, 
+      ...children.contents.map(c => c.id)
     ];
+    
+    // 4. 結合したIDリストでORフィルターを作成し、記事取得リクエストを1回にまとめる
+    const filters = categoryIds.map(id => `category[equals]${id}`).join('[or]');
+    const postsData = await getArticles({ 
+      limit: 100,
+      filters: filters,
+      fields: 'id,title,slug,description,eyecatch,category,publishedAt,updatedAt' // 既存のfields指定を維持
+    });
+    posts = postsData.contents;
 
   } else {
+    // 子カテゴリーの場合は、これまで通り該当カテゴリーの記事を取得するだけ
     const postsData = await getArticles({
       limit: 100,
       filters: `category[equals]${category.id}`,
       fields: 'id,title,slug,description,eyecatch,category,publishedAt,updatedAt'
     });
     posts = postsData.contents;
-
-    if (category.parent) {
-       breadcrumbItems = [
-        { name: 'ホーム', href: '/' },
-        { name: category.parent.name, href: `/category/${category.parent.slug}` },
-        { name: category.name, href: `/category/${category.slug}` },
-      ];
-    } else {
-       breadcrumbItems = [
-        { name: 'ホーム', href: '/' },
-        { name: category.name, href: `/category/${category.slug}` },
-      ];
-    }
   }
+
+  // パンくずリストの生成ロジック (変更なし)
+  const breadcrumbItems = [
+    { name: 'ホーム', href: '/' },
+    ...(category.parent ? [{ name: category.parent.name, href: `/category/${category.parent.slug}` }] : []),
+    { name: category.name, href: `/category/${category.slug}` },
+  ];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -113,7 +101,7 @@ export default async function CategoryPage({ params }: Props) {
               <ArticleCard 
                 key={post.id} 
                 article={post} 
-                priority={index === 0} // ← 追加: 最初の記事だけプリロード
+                priority={index === 0}
               />
             ))}
           </div>
