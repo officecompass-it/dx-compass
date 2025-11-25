@@ -3,7 +3,7 @@
 
 /* 追加: フォント変数の紐付け */
 @theme {
-  --font-sans: var(--font-noto-sans-jp), "Noto Sans JP", sans-serif;
+  --font-sans: var(--font-noto-sans-jp), sans-serif;
 }
 
 @layer utilities {

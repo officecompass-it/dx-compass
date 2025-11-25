@@ -6,7 +6,7 @@ import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { formatDate } from '@/utils/formatDate';
 import type { Article } from '@/lib/microcms';
 import styles from './prose-styles.module.css';
-import * as cheerio from 'cheerio'; // ★ cheerioライブラリをインポート
+import * as cheerio from 'cheerio'; // 修正: cheerioのインポート
 
 // サイトURLを安全に構築するヘルパー関数
 const getSiteUrl = () => {
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return metadata;
 }
 
-// 静的パス生成 (変更なし)
+// 静的パス生成 (変更なし - これによりCheerioの負荷はビルド時のみになります)
 export async function generateStaticParams() {
   const { contents } = await getArticles({ fields: ['id'] });
   return contents.map((article) => ({
@@ -88,7 +88,7 @@ export default async function ArticleDetail({ params }: Props) {
   }
   breadcrumbItems.push({ name: article.title, href: `/posts/${article.id}` });
 
-  // JSON-LD (構造化データ) の拡充 (変更なし)
+  // JSON-LD (変更なし)
   const siteUrl = getSiteUrl();
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -117,24 +117,35 @@ export default async function ArticleDetail({ params }: Props) {
     },
   };
 
-  // ★ここから変更: cheerioを使ってサーバーサイドでHTMLを加工
+  // ★修正: HTML加工処理を追加 (CLS対策の核心)
   const processHtmlBody = (html: string | undefined): string => {
     if (!html) {
       return '';
     }
     const $ = cheerio.load(html);
 
-    // 1. 全ての<table>タグを検索
+    // 1. 画像(CLS)対策: width/heightを強制付与
+    $('img').each((_, elem) => {
+      const $img = $(elem);
+      
+      // 遅延読み込みと非同期デコードを付与
+      $img.attr('loading', 'lazy');
+      $img.attr('decoding', 'async');
+
+      // 属性がない場合にデフォルト値を設定 (Tailwind Typographyで見た目は調整される)
+      if (!$img.attr('width')) {
+        $img.attr('width', '1200');
+      }
+      if (!$img.attr('height')) {
+        $img.attr('height', '675'); // 16:9
+      }
+    });
+
+    // 2. テーブル対策 (以前のreplaceロジックをCheerioで書き換え)
     $('table').each((_, tableEl) => {
       const $table = $(tableEl);
-      
-      // 2. <table>を<div class="table-wrapper">でラップする
       $table.wrap('<div class="table-wrapper"></div>');
-      
-      // 3. テーブル内の各行(<tr>)を検索
       $table.find('tr').each((_, rowEl) => {
-        // 4. 各行の最初のヘッダーセル(<th>)またはデータセル(<td>)に、
-        //    CSS Modulesからインポートしたクラス名を追加する
         $(rowEl).find('th:first-child, td:first-child').addClass(styles.stickyColumn);
       });
     });
@@ -142,7 +153,6 @@ export default async function ArticleDetail({ params }: Props) {
     return $.html();
   };
 
-  // ★以前の.replace()による処理を、新しい関数呼び出しに置き換え
   const processedBody = processHtmlBody(article.body);
 
   return (
@@ -169,7 +179,7 @@ export default async function ArticleDetail({ params }: Props) {
 
           {article.eyecatch && (
             <figure className="mb-8">
-              <div className="relative w-full aspect-[2/1] overflow-hidden rounded-lg">
+              <div className="relative w-full aspect-[16/9] overflow-hidden rounded-lg bg-gray-100">
                 <Image
                   src={article.eyecatch.url}
                   alt={article.title || '記事のアイキャッチ画像'}

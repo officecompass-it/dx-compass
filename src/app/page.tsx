@@ -1,4 +1,5 @@
-import { getArticles, getHierarchicalCategories } from '@/lib/microcms';
+// 修正: LIST_FIELDS をインポート
+import { getArticles, getHierarchicalCategories, LIST_FIELDS } from '@/lib/microcms';
 import { ArticleCarousel } from '@/components/ArticleCarousel';
 import { Metadata } from 'next';
 import type { Article } from '@/lib/microcms';
@@ -12,7 +13,12 @@ export default async function HomePage() {
   // 親子関係を持つカテゴリーと、全記事を取得
   const [hierarchicalCategories, allPosts] = await Promise.all([
     getHierarchicalCategories(),
-    getArticles({ orders: '-publishedAt', limit: 100 }), // カテゴリ分けのため多めに取得
+    // 修正: fieldsを指定してデータ量を削減
+    getArticles({ 
+      orders: '-publishedAt', 
+      limit: 100,
+      fields: LIST_FIELDS 
+    }), 
   ]);
 
   const latestPosts = allPosts.contents.slice(0, 5);
@@ -32,7 +38,7 @@ export default async function HomePage() {
           
           // 記事のカテゴリーIDが子カテゴリーIDリストに含まれるものをフィルタリング
           const postsInParentCategory = allPosts.contents.filter(post => 
-            childCategoryIds.includes(post.category.id)
+            post.category && childCategoryIds.includes(post.category.id)
           );
 
           // 該当する記事がなければセクションを表示しない

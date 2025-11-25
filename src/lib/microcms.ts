@@ -41,6 +41,9 @@ export type HierarchicalCategory = Category & {
   children: HierarchicalCategory[];
 };
 
+// ★追加: 一覧取得時の軽量化用フィールド定義 (将来のタグ実装も見越して tags を含める)
+export const LIST_FIELDS = ['id', 'title', 'publishedAt', 'eyecatch', 'category', 'tags'] as const;
+
 if (!process.env.MICROCMS_SERVICE_DOMAIN) {
   throw new Error("MICROCMS_SERVICE_DOMAIN is required");
 }
@@ -67,13 +70,11 @@ export const getArticles = async (queries?: MicroCMSQueries) => {
   return listData;
 };
 
-// ▼▼▼ ここから修正 ▼▼▼
-// <T = Article> を追加して、ジェネリック型を受け取れるようにする
+// 提示いただいたジェネリック対応版を使用
 export const getArticleDetail = async <T = Article>(
   slug: string,
   queries?: MicroCMSQueries
 ) => {
-  // client.getListDetail<Article> を client.getListDetail<T> に変更
   const detailData = await client.getListDetail<T>({
     endpoint: "posts",
     contentId: slug,
@@ -87,7 +88,6 @@ export const getArticleDetail = async <T = Article>(
   });
   return detailData;
 };
-// ▲▲▲ ここまで修正 ▲▲▲
 
 export const getProfile = async (queries?: MicroCMSQueries) => {
   const profileData = await client.getObject<Profile>({
