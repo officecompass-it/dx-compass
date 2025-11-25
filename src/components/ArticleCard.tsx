@@ -11,18 +11,20 @@ type Props = {
 
 export const ArticleCard = ({ article, variant = 'grid', priority = false }: Props) => {
   const hasPublishedDate = article.publishedAt;
+  // "h-full" で高さを親に合わせつつ、各要素のサイズを安定させる
   const cardClasses = "bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 flex flex-col relative hover:z-10 h-full";
 
   return (
     <div className={cardClasses}>
-      <Link href={`/posts/${article.id}`} className="block h-full">
-        <div className="relative w-full" style={{ paddingTop: '56.25%' }}>
+      <Link href={`/posts/${article.id}`} className="block h-full flex flex-col">
+        {/* 修正: paddingハックを廃止し、aspect-video と bg-gray-200 を適用 */}
+        <div className="relative w-full aspect-video bg-gray-200">
           <Image
             src={article.eyecatch?.url || '/no-image.png'}
             alt={article.title || '記事のアイキャッチ画像'}
-            className="absolute top-0 left-0 w-full h-full object-cover"
-            width={article.eyecatch?.width || 1200}
-            height={article.eyecatch?.height || 630}
+            className="object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority={priority}
             quality={85} 
           />
