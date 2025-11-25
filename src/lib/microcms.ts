@@ -200,3 +200,20 @@ export const getHierarchicalCategories = async (): Promise<HierarchicalCategory[
   const data = await getCategories({ limit: 100, depth: 2 });
   return buildCategoryTree(data.contents);
 };
+
+// ★追加: 記事リストからユニークなタグ一覧を抽出するヘルパー関数
+export const getUniqueTagsFromArticles = (articles: Article[]): Tag[] => {
+  const tagMap = new Map<string, Tag>();
+  articles.forEach(article => {
+    if (article.tags && Array.isArray(article.tags)) {
+      article.tags.forEach(tag => {
+        // タグIDをキーにして重複を排除
+        if (!tagMap.has(tag.id)) {
+          tagMap.set(tag.id, tag);
+        }
+      });
+    }
+  });
+  // Mapの値（Tagオブジェクト）を配列にして返す
+  return Array.from(tagMap.values());
+};
