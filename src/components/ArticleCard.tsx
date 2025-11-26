@@ -14,7 +14,6 @@ export const ArticleCard = ({ article, variant = 'grid', priority = false }: Pro
   const cardClasses = "bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 flex flex-col relative hover:z-10 h-full";
 
   // ★修正1: カルーセル(carousel)の時は、小さなサイズ(224px)だけを要求するように最適化
-  // これにより、不必要に巨大な画像のダウンロードを防ぎます
   const imageSizes = variant === 'carousel'
     ? '(max-width: 640px) 224px, 256px' 
     : '(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw';
@@ -31,7 +30,7 @@ export const ArticleCard = ({ article, variant = 'grid', priority = false }: Pro
             fill
             sizes={imageSizes}     // ★最適化したサイズ変数を適用
             priority={priority}    // ★重要: これがtrueなら fetchpriority="high" が付く
-            quality={85} 
+            quality={70} 
             decoding={priority ? 'sync' : 'async'}
           />
         </div>
