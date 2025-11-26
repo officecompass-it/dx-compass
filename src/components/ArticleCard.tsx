@@ -32,6 +32,7 @@ export const ArticleCard = ({ article, variant = 'grid', priority = false }: Pro
             sizes={imageSizes}     // ★最適化したサイズ変数を適用
             priority={priority}    // ★重要: これがtrueなら fetchpriority="high" が付く
             quality={85} 
+            decoding={priority ? 'sync' : 'async'}
           />
         </div>
         <div className="p-4 md:p-5 flex flex-col flex-grow">
