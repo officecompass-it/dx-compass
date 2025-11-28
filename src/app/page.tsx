@@ -5,8 +5,8 @@ import { Metadata } from 'next';
 import type { Article } from '@/lib/microcms';
 
 export const metadata: Metadata = {
-  title: 'DXの羅針盤 | AppSheetとWorkspace専門ブログ',
-  description: 'AppSheetやGoogle Workspaceの最新技術情報、実践的な活用ノウハウを発信する専門技術ブログサイト「DXの羅針盤」。',
+  title: 'DXの羅針盤 | AppSheetとLookerStudio専門ブログ',
+  description: 'AppSheetやLookerStudioの最新技術情報、実践的な活用ノウハウを発信する専門技術ブログサイトです。基礎的な内容から応用まで、これさえあれば何でもつくれるを目指して解説しています',
 };
 
 export default async function HomePage() {
