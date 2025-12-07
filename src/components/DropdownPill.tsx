@@ -123,6 +123,9 @@ export const DropdownPill = ({
   };
 
   const isActive = getActiveState(category);
+  
+  // ★追加: 親カテゴリー（すべて）が選択されているか判定
+  const isParentActive = pathname === `/category/${category.slug}`;
 
   const dropdownMenu = isOpen && hasChildren && mounted && isPositionCalculated && (
     <div
@@ -135,6 +138,19 @@ export const DropdownPill = ({
       }}
     >
       <div className="py-1">
+        {/* ★追加: 「すべて」のリンク */}
+        <Link
+          href={`/category/${category.slug}`}
+          className={`block px-4 py-2 text-sm transition-colors ${
+            isParentActive
+              ? 'bg-gray-100 text-gray-900 font-medium'
+              : 'text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          すべて
+        </Link>
+
+        {/* 既存の子カテゴリーリスト */}
         {category.children?.map(child => {
           const isChildActive = pathname === `/category/${child.slug}`;
           return (
