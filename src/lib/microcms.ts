@@ -6,6 +6,9 @@ import type {
   MicroCMSListContent,
 } from "microcms-js-sdk";
 
+// ★追加: 繰り返しフィールド用の型定義
+// 繰り返しフィールド用の型定義は削除 (regex自動検知に一本化のため)
+
 export type Tag = {
   name: string;
   slug: string;
@@ -21,7 +24,7 @@ export type Article = {
   id: string;
   title: string;
   slug: string;
-  body?: string;
+  body: string;
   description?: string;
   eyecatch?: MicroCMSImage;
   category: Category;
@@ -42,7 +45,7 @@ export type HierarchicalCategory = Category & {
 };
 
 // ★追加: 一覧取得時の軽量化用フィールド定義 (将来のタグ実装も見越して tags を含める)
-export const LIST_FIELDS = ['id', 'title', 'publishedAt', 'eyecatch', 'category', 'tags'] ;
+export const LIST_FIELDS = ['id', 'title', 'publishedAt', 'eyecatch', 'category', 'tags'];
 
 if (!process.env.MICROCMS_SERVICE_DOMAIN) {
   throw new Error("MICROCMS_SERVICE_DOMAIN is required");
@@ -61,7 +64,7 @@ export const getArticles = async (queries?: MicroCMSQueries) => {
     endpoint: "posts",
     queries,
     customRequestInit: {
-      next: { 
+      next: {
         revalidate: 600, // 10分キャッシュ
         tags: ['articles'] // キャッシュタグ
       },
@@ -80,8 +83,8 @@ export const getArticleDetail = async <T = Article>(
     contentId: slug,
     queries,
     customRequestInit: {
-      next: { 
-        revalidate: 600,
+      next: {
+        revalidate: 0,
         tags: ['articles', `article-${slug}`]
       },
     },
@@ -94,7 +97,7 @@ export const getProfile = async (queries?: MicroCMSQueries) => {
     endpoint: "profile",
     queries,
     customRequestInit: {
-      next: { 
+      next: {
         revalidate: 3600,
         tags: ['profile']
       },
@@ -108,7 +111,7 @@ export const getCategories = async (queries?: MicroCMSQueries) => {
     endpoint: 'categories',
     queries,
     customRequestInit: {
-      next: { 
+      next: {
         revalidate: 600,
         tags: ['categories']
       },
@@ -126,7 +129,7 @@ export const getCategoryDetail = async (
     contentId,
     queries,
     customRequestInit: {
-      next: { 
+      next: {
         revalidate: 600,
         tags: ['categories', `category-${contentId}`]
       },
@@ -146,7 +149,7 @@ export const getPostsByCategory = async (
       filters: `category[equals]${categoryId}`,
     },
     customRequestInit: {
-      next: { 
+      next: {
         revalidate: 600,
         tags: ['articles', `category-posts-${categoryId}`]
       },
@@ -160,7 +163,7 @@ export const getTags = async (queries?: MicroCMSQueries) => {
     endpoint: 'tags',
     queries,
     customRequestInit: {
-      next: { 
+      next: {
         revalidate: 3600,
         tags: ['tags']
       },

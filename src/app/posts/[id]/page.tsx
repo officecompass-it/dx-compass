@@ -9,6 +9,7 @@ import type { Article } from '@/lib/microcms';
 import styles from './prose-styles.module.css';
 import * as cheerio from 'cheerio';
 
+
 // サイトURLヘルパー
 const getSiteUrl = () => {
   return process.env.NEXT_PUBLIC_SITE_URL || (process.env.VERCEL_URL ? `https://` + process.env.VERCEL_URL : 'http://localhost:3000');
@@ -62,14 +63,24 @@ export async function generateStaticParams() {
 // 記事詳細ページ本体
 export default async function ArticleDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  
+
   const [article, profile] = await Promise.all([
     getArticleDetail(resolvedParams.id).catch(() => notFound()),
     getProfile().catch(() => null)
   ]);
 
+  // Debug logging
+  if (article) {
+    console.log('--- Article Debug Info ---');
+    console.log('ID:', article.id);
+    console.log('Body Type:', typeof article.body);
+    console.log('Is Array:', Array.isArray(article.body));
+    console.log('All Keys:', Object.keys(article)); // 全フィールドキーを確認
+    // console.log('Full Article:', JSON.stringify(article, null, 2)); // 必要であれば全体出力
+  }
+
   if (!article) { notFound(); }
-  
+
   const breadcrumbItems = [
     { name: 'ホーム', href: '/' },
   ];
@@ -126,24 +137,58 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
         $(rowEl).find('th:first-child, td:first-child').addClass(styles.stickyColumn);
       });
     });
-    
+
+    // Cloudinary動画URLの自動変換 (Legacy String Fallback)
+    $('p').each((_, elem) => {
+      const $p = $(elem);
+      const text = $p.text().trim();
+      const isCloudinaryVideo = /^https:\/\/res\.cloudinary\.com\/.*?\.(mp4|webm|mov)$/i.test(text);
+
+      if (isCloudinaryVideo) {
+        // 最適化: URLにq_auto, f_autoを付与
+        const optimizedUrl = text.replace('/upload/', '/upload/f_auto,q_auto/');
+        const posterUrl = optimizedUrl.replace(/\.(mp4|webm|mov)$/i, '.jpg');
+
+        const videoHtml = `
+          <div class="my-8 w-full">
+            <div 
+              class="relative overflow-hidden rounded-xl shadow-lg bg-gray-100 w-full"
+              style="aspect-ratio: 16/9;"
+            >
+              <video
+                class="w-full h-full object-cover"
+                src="${optimizedUrl}"
+                poster="${posterUrl}"
+                autoplay
+                loop
+                muted
+                playsinline
+                webkit-playsinline="true"
+              ></video>
+            </div>
+          </div>
+        `;
+        $p.replaceWith(videoHtml);
+      }
+    });
+
     return $.html();
   };
 
-  const processedBody = processHtmlBody(article.body);
+
 
   return (
     // ページ全体のコンテナ
     // スマホ: px-4, PC: md:px-8
     <div className="container max-w-[1440px] mx-auto px-4 md:px-8 py-8 bg-gray-50/50">
-      
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start mt-6">
-        
+
         {/* メインカラム */}
         <main className="min-w-0 w-full">
           {/* 
@@ -152,7 +197,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
             PC: md:w-fit md:mx-auto (中身に合わせて中央寄せ)
           */}
           <div className="w-full md:w-fit md:mx-auto">
-            
+
             <div className="mb-4 w-full">
               <Breadcrumbs items={breadcrumbItems} />
             </div>
@@ -160,7 +205,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
             {/* 記事ブロック (白い箱) */}
             {/* パディング: スマホ(p-5) / PC(md:p-[30px]) */}
             <article className="w-full bg-white border border-gray-100 rounded-xl p-5 md:p-[30px] shadow-sm">
-              
+
               <header className="mb-8 border-b border-gray-100 pb-8 prose prose-indigo">
                 {/* 
                   タイトル
@@ -193,10 +238,11 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
                 </figure>
               )}
 
-              {/* 本文エリア */}
+              {/* 本文エリア: 繰り返しフィールドのレンダリング */}
+              {/* 本文エリア: Cloudinary URL自動置換 (Regex) */}
               <div
-                dangerouslySetInnerHTML={{ __html: processedBody }}
                 className={`prose prose-indigo ${styles.prose} relative`}
+                dangerouslySetInnerHTML={{ __html: processHtmlBody(article.body) }}
               />
             </article>
           </div>
