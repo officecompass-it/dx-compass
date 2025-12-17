@@ -69,15 +69,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
     getProfile().catch(() => null)
   ]);
 
-  // Debug logging
-  if (article) {
-    console.log('--- Article Debug Info ---');
-    console.log('ID:', article.id);
-    console.log('Body Type:', typeof article.body);
-    console.log('Is Array:', Array.isArray(article.body));
-    console.log('All Keys:', Object.keys(article)); // 全フィールドキーを確認
-    // console.log('Full Article:', JSON.stringify(article, null, 2)); // 必要であれば全体出力
-  }
+
 
   if (!article) { notFound(); }
 
