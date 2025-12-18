@@ -8,6 +8,7 @@ import { formatDate } from '@/utils/formatDate';
 import type { Article } from '@/lib/microcms';
 import styles from './prose-styles.module.css';
 import * as cheerio from 'cheerio';
+import { ArticleBody } from './ArticleBody';
 
 
 // サイトURLヘルパー
@@ -232,9 +233,9 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
 
               {/* 本文エリア: 繰り返しフィールドのレンダリング */}
               {/* 本文エリア: Cloudinary URL自動置換 (Regex) */}
-              <div
+              <ArticleBody
                 className={`prose prose-indigo ${styles.prose} relative`}
-                dangerouslySetInnerHTML={{ __html: processHtmlBody(article.body) }}
+                html={processHtmlBody(article.body)}
               />
             </article>
           </div>
