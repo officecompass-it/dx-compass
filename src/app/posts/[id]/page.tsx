@@ -9,6 +9,7 @@ import type { Article } from '@/lib/microcms';
 import styles from './prose-styles.module.css';
 import * as cheerio from 'cheerio';
 import { ArticleBody } from './ArticleBody';
+import { TableOfContents } from '@/components/TableOfContents';
 
 
 // サイトURLヘルパー
@@ -111,8 +112,14 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
     },
   };
 
-  const processHtmlBody = (html: string | undefined): string => {
-    if (!html) { return ''; }
+  type TocItem = {
+    id: string;
+    text: string;
+    name: string;
+  };
+
+  const processHtmlBody = (html: string | undefined): { html: string; toc: TocItem[] } => {
+    if (!html) { return { html: '', toc: [] }; }
     const $ = cheerio.load(html);
 
     $('img').each((_, elem) => {
@@ -128,6 +135,20 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
       $table.wrap('<div class="table-wrapper"></div>');
       $table.find('tr').each((_, rowEl) => {
         $(rowEl).find('th:first-child, td:first-child').addClass(styles.stickyColumn);
+      });
+    });
+
+    // 目次生成 (h1, h2, h3)
+    const toc: TocItem[] = [];
+    $('h1, h2, h3').each((index, elem) => {
+      const $elem = $(elem);
+      const text = $elem.text();
+      const id = `section-${index}`;
+      $elem.attr('id', id);
+      toc.push({
+        id,
+        text,
+        name: $elem.prop('tagName')?.toLowerCase() || '',
       });
     });
 
@@ -165,10 +186,10 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
       }
     });
 
-    return $.html();
+    return { html: $.html(), toc };
   };
 
-
+  const { html: processedHtml, toc } = processHtmlBody(article.body);
 
   return (
     // ページ全体のコンテナ
@@ -231,11 +252,14 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
                 </figure>
               )}
 
+              {/* 目次コンポーネント */}
+              <TableOfContents toc={toc} />
+
               {/* 本文エリア: 繰り返しフィールドのレンダリング */}
               {/* 本文エリア: Cloudinary URL自動置換 (Regex) */}
               <ArticleBody
                 className={`prose prose-indigo ${styles.prose} relative`}
-                html={processHtmlBody(article.body)}
+                html={processedHtml}
               />
             </article>
           </div>
