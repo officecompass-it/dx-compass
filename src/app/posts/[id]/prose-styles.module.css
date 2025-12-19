@@ -131,14 +131,14 @@
 thead tr .stickyColumn { background-color: rgb(249 250 251); }
 
 /* 見出し装飾 */
-.prose :is(h1, h4) { 
+.prose :is(h2, h5) { 
   position: relative; 
   padding-left: 1em;
   /* 見出しが画面幅を超えないようにする */
   max-width: 100%;
   overflow-wrap: break-word;
 }
-.prose :is(h1, h4)::before { 
+.prose :is(h2, h5)::before { 
   content: ''; 
   position: absolute; 
   left: 0; 
@@ -148,7 +148,7 @@ thead tr .stickyColumn { background-color: rgb(249 250 251); }
   background-color: #3b82f6; 
   border-radius: 2px; 
 }
-.prose h2 { 
+.prose h3 { 
   position: relative; 
   padding-bottom: 0.5em; 
   /* 重要: width: max-contentを削除し、100%に制限 */
@@ -158,7 +158,7 @@ thead tr .stickyColumn { background-color: rgb(249 250 251); }
   /* 長い見出しの折り返し */
   overflow-wrap: break-word;
 }
-.prose h2::after { 
+.prose h3::after { 
   content: ''; 
   position: absolute; 
   bottom: 0; 
@@ -167,7 +167,7 @@ thead tr .stickyColumn { background-color: rgb(249 250 251); }
   height: 2px; 
   background-color: #3b82f6; 
 }
-.prose h3 { 
+.prose h4 { 
   margin-top: 1.6em; 
   margin-bottom: 0.6em;
   /* 見出しが画面幅を超えないようにする */
@@ -176,24 +176,24 @@ thead tr .stickyColumn { background-color: rgb(249 250 251); }
 }
 
 /* 見出しのフォントサイズ設定 */
-.prose h1 { 
+.prose h2 { 
   font-size: 24px !important; 
   font-weight: 800 !important; 
 }
-.prose h2 { 
+.prose h3 { 
   font-size: 20px !important; 
   font-weight: 700 !important; 
 }
-.prose h3 { 
+.prose h4 { 
   font-size: 18px !important; 
   font-weight: 600 !important; 
 }
-.prose h4 { 
+.prose h5 { 
   font-weight: 600 !important; 
 }
 
 /* PC表示時の見出しサイズ調整 */
 @media (min-width: 768px) {
-  .prose h1 { font-size: 28px !important; }
-  .prose h2 { font-size: 22px !important; }
+  .prose h2 { font-size: 28px !important; }
+  .prose h3 { font-size: 22px !important; }
 }

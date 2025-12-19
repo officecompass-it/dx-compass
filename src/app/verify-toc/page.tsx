@@ -25,9 +25,14 @@ export default function VerifyTocPage() {
         if (!html) { return { html: '', toc: [] }; }
         const $ = cheerio.load(html);
 
-        // 目次生成 (h1, h2, h3)
+        // タグの変換 (h1->h2, h2->h3, h3->h4)
+        $('h3').each((_, elem) => { $(elem).replaceWith($(`<h4>${$(elem).html()}</h4>`)); });
+        $('h2').each((_, elem) => { $(elem).replaceWith($(`<h3>${$(elem).html()}</h3>`)); });
+        $('h1').each((_, elem) => { $(elem).replaceWith($(`<h2>${$(elem).html()}</h2>`)); });
+
+        // 目次生成 (h2, h3, h4)
         const toc: TocItem[] = [];
-        $('h1, h2, h3').each((index, elem) => {
+        $('h2, h3, h4').each((index, elem) => {
             const $elem = $(elem);
             const text = $elem.text();
             const id = `section-${index}`;

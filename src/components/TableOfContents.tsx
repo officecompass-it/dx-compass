@@ -50,7 +50,7 @@ export const TableOfContents = ({ toc }: Props) => {
                 {toc.map((item) => (
                     <li
                         key={item.id}
-                        className={`${item.name === 'h1' ? 'ml-0' : item.name === 'h2' ? 'ml-4' : item.name === 'h3' ? 'ml-8' : ''}`}
+                        className={`${item.name === 'h2' ? 'ml-0' : item.name === 'h3' ? 'ml-4' : item.name === 'h4' ? 'ml-8' : ''}`}
                     >
                         <a
                             href={`#${item.id}`}
