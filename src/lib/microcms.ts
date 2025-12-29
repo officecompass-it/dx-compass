@@ -71,6 +71,25 @@ export const getArticles = async (queries?: MicroCMSQueries) => {
     },
   });
   return listData;
+  return listData;
+};
+
+// ★追加: 最新記事取得 (5件)
+export const getRecentBlogs = async () => {
+  const listData = await client.getList<Article>({
+    endpoint: "posts",
+    queries: {
+      limit: 5,
+      fields: ['id', 'title', 'publishedAt', 'eyecatch', 'category'],
+    },
+    customRequestInit: {
+      next: {
+        revalidate: 600,
+        tags: ['articles', 'recent-articles']
+      },
+    },
+  });
+  return listData.contents;
 };
 
 // 提示いただいたジェネリック対応版を使用

@@ -1,9 +1,9 @@
-import { getArticleDetail, getArticles, getProfile } from '@/lib/microcms';
+import { getArticleDetail, getArticles, getProfile, getRecentBlogs } from '@/lib/microcms';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
-import { ProfileCard } from '@/components/ProfileCard';
+import { Sidebar } from '@/components/Sidebar';
 import { formatDate } from '@/utils/formatDate';
 import type { Article } from '@/lib/microcms';
 import styles from './prose-styles.module.css';
@@ -66,9 +66,11 @@ export async function generateStaticParams() {
 export default async function ArticleDetail({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
 
-  const [article, profile] = await Promise.all([
+
+  const [article, profile, recentArticles] = await Promise.all([
     getArticleDetail(resolvedParams.id).catch(() => notFound()),
-    getProfile().catch(() => null)
+    getProfile().catch(() => null),
+    getRecentBlogs().catch(() => []),
   ]);
 
 
@@ -207,7 +209,7 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 items-start mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 mt-6">
 
         {/* メインカラム */}
         <main className="min-w-0 w-full">
@@ -261,7 +263,6 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
               {/* 目次コンポーネント */}
               <TableOfContents toc={toc} />
 
-              {/* 本文エリア: 繰り返しフィールドのレンダリング */}
               {/* 本文エリア: Cloudinary URL自動置換 (Regex) */}
               <ArticleBody
                 className={`prose prose-indigo ${styles.prose} relative`}
@@ -273,11 +274,9 @@ export default async function ArticleDetail({ params }: { params: Promise<{ id: 
 
         {/* 
           サイドバー
-          top-[132px]: ヘッダーの高さなどを考慮した初期位置
-          h-fit: 高さを中身に合わせる（ズレ防止）
         */}
-        <aside className="w-full lg:sticky lg:top-[132px] h-fit">
-          {profile && <ProfileCard profile={profile} />}
+        <aside className="w-full lg:sticky lg:bottom-8 lg:self-end">
+          <Sidebar profile={profile || undefined} recentArticles={recentArticles} />
         </aside>
 
       </div>
