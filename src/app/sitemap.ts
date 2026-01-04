@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // カテゴリー
   const categories = await getCategories({ limit: 100 });
   const categoryRoutes = categories.contents.map((category) => ({
-    url: `${BASE_URL}/category/${category.id}`,
+    url: `${BASE_URL}/category/${category.slug}`,
     lastModified: new Date(),
   }));
 
